@@ -4,11 +4,16 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 import av
+import os
 
 # =====================================
-# LOAD MODEL & PREDICT FUNCTION OUTSIDE (TIDAK DIUBAH)
+# LOAD MODEL & PREDICT FUNCTION OUTSIDE
 # =====================================
-interpreter = tflite.Interpreter(model_path="BO_Resnet_5class.tflite")
+# Menggunakan os.path untuk mengunci lokasi pasti file model di Streamlit Cloud
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
+
+interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
