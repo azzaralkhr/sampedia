@@ -8,7 +8,7 @@ import av
 # =====================================
 # LOAD MODEL & PREDICT FUNCTION OUTSIDE (TIDAK DIUBAH)
 # =====================================
-interpreter = tf.lite.Interpreter(model_path="BO_Resnet_5class.tflite")
+interpreter = tflite.Interpreter(model_path="BO_Resnet_5class.tflite")
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
