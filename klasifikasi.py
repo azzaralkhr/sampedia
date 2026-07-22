@@ -7,32 +7,76 @@ import av
 import os
 
 # =====================================
-# LOAD MODEL & PREDICT FUNCTION OUTSIDE
+# LOAD MODEL DENGAN CACHE & VALIDASI
 # =====================================
-# Menggunakan os.path untuk mengunci lokasi pasti file model di Streamlit Cloud
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
 
-interpreter = tflite.Interpreter(model_path=MODEL_PATH)
-interpreter.allocate_tensors()
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+@st.cache_resource
+def load_tflite_model(model_path):
+    """
+    Fungsi aman untuk memuat model TFLite.
+    Menggunakan st.cache_resource agar model hanya di-load 1 kali ke memori.
+    """
+    if not os.path.exists(model_path):
+        st.error(f"❌ File model tidak ditemukan di path: {model_path}")
+        return None
+    
+    # Cek apakah ukuran file valid (tidak 0 byte / corrupt)
+    if os.path.getsize(model_path) < 1000:
+        st.error("❌ File model `.tflite` rusak atau terpotong saat di-upload ke GitHub.")
+        return None
+
+    try:
+        interpreter = tflite.Interpreter(model_path=model_path)
+        interpreter.allocate_tensors()
+        return interpreter
+    except Exception as e:
+        st.error(f"❌ Gagal menginisialisasi TFLite Interpreter: {e}")
+        return None
+
+# Memuat model
+interpreter = load_tflite_model(MODEL_PATH)
 
 def predict_image(img):
+    if interpreter is None:
+        st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
+        return "Unknown", 0.0
+
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
     img = cv2.resize(img, (224, 224))
     img = img.astype(np.float32)
+    
+    # Normalisasi piksel jika diperlukan oleh model
+    if img.max() > 1.0:
+        img = img / 255.0
+
     img = np.expand_dims(img, axis=0)
     interpreter.set_tensor(input_details[0]['index'], img)
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
-    prob = float(pred[0][0])
 
-    if prob > 0.5:
-        label = "Recyclable"
-        confidence = prob
+    # Logika fleksibel untuk model 2 Kelas (Binary)
+    if pred.shape[-1] == 1:
+        prob = float(pred[0][0])
+        if prob > 0.5:
+            label = "Recyclable"
+            confidence = prob
+        else:
+            label = "Organic"
+            confidence = 1.0 - prob
     else:
-        label = "Organic"
-        confidence = 1 - prob
+        # Jika layer output berupa 2 neuron (Softmax/Argmax)
+        prob_organic = float(pred[0][0])
+        prob_recyclable = float(pred[0][1])
+        if prob_recyclable > prob_organic:
+            label = "Recyclable"
+            confidence = prob_recyclable
+        else:
+            label = "Organic"
+            confidence = prob_organic
 
     return label, confidence
 
@@ -284,7 +328,6 @@ def render_page():
                 st.image(st.session_state.pred_img, caption="Foto Objek Dideteksi", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
-                    # Tampilan Badge Kategori Organik (Ukuran Teks Diperbesar)
                     st.markdown(f"""
                     <div style='background-color: #eff6ff; border: 2px solid #93c5fd; padding: 18px; border-radius: 12px; text-align: center; margin-top: 12px;'>
                         <h2 style='margin: 0; color: #1e40af; font-size: 26px; font-weight: 800;'>🍂 SAMPAH ORGANIK</h2>
@@ -314,7 +357,6 @@ def render_page():
                         """)
                         
                 else:
-                    # Tampilan Badge Kategori Anorganik (Ukuran Teks Diperbesar)
                     st.markdown(f"""
                     <div style='background-color: #fffbeb; border: 2px solid #fde68a; padding: 18px; border-radius: 12px; text-align: center; margin-top: 12px;'>
                         <h2 style='margin: 0; color: #92400e; font-size: 26px; font-weight: 800;'>🍾 ANORGANIK (RECYCLABLE)</h2>
