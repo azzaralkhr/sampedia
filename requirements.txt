@@ -1,0 +1,6 @@
+streamlit
+opencv-python-headless
+numpy
+streamlit-webrtc
+av
+https://github.com/google-ai-edge/tflite-runtime/releases/download/v2.14.0/tflite_runtime-2.14.0-cp310-cp310-linux_x86_64.whl
