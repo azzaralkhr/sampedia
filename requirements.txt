@@ -3,6 +3,6 @@ numpy
 Pillow
 tflite-runtime
 opencv-python-headless
-tensorflow
+
 streamlit-webrtc
 av
