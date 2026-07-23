@@ -1,13 +1,13 @@
 import streamlit as st
 import cv2
 import numpy as np
-import tflite_runtime.interpreter as tflite
+import tensorflow as tf
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 import av
 import os
 
 # =====================================
-# LOAD MODEL DENGAN CACHE & VALIDASI
+# LOAD MODEL DENGAN CACHE & BYTE STREAMING
 # =====================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
@@ -15,48 +15,50 @@ MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
 @st.cache_resource
 def load_tflite_model(model_path):
     """
-    Fungsi aman untuk memuat model TFLite 2 Kelas.
-    Menggunakan st.cache_resource agar model hanya di-load 1 kali ke memori.
+    Fungsi aman membaca model via byte stream untuk mencegah error PyCapsule C++.
     """
     if not os.path.exists(model_path):
         st.error(f"❌ File model tidak ditemukan di path: {model_path}")
         return None
     
-    # Cek apakah ukuran file valid (tidak corrupt)
     file_size = os.path.getsize(model_path)
     if file_size < 1000:
         st.error("❌ File model `.tflite` rusak atau terpotong saat di-upload ke GitHub.")
         return None
 
     try:
-        interpreter = tflite.Interpreter(model_path=model_path)
+        # Membaca model sebagai bytes menghindari bug C++ path loader
+        with open(model_path, 'rb') as f:
+            model_content = f.read()
+            
+        interpreter = tf.lite.Interpreter(model_content=model_content)
         interpreter.allocate_tensors()
         return interpreter
     except Exception as e:
         st.error(f"❌ Gagal menginisialisasi TFLite Interpreter: {e}")
         return None
 
-# Memuat model sekali secara global
+# Memuat model secara global
 interpreter = load_tflite_model(MODEL_PATH)
 
 def predict_image(img_bgr):
     """
-    Fungsi preprocessing dan inferensi khusus model 2 Kelas (Organic / Recyclable).
+    Fungsi preprocessing (BGR->RGB) dan prediksi 2 Kelas.
     """
     if interpreter is None:
-        st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
+        st.error("Model TFLite gagal dimuat. Harap periksa konfigurasi Anda.")
         return "Unknown", 0.0
 
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # 1. KONVERSI WARNA: BGR (OpenCV) -> RGB (Sangat Penting untuk Akurasi)
+    # 1. KONVERSI WARNA BGR (OpenCV) -> RGB (Sangat Krusial)
     if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     else:
         img_rgb = img_bgr
 
-    # 2. RESIZE GAMBAR KE INPUT MODEL (224x224)
+    # 2. RESIZE GAMBAR KE 224x224
     img_resized = cv2.resize(img_rgb, (224, 224))
     img_float = img_resized.astype(np.float32)
     
@@ -64,7 +66,7 @@ def predict_image(img_bgr):
     if img_float.max() > 1.0:
         img_float = img_float / 255.0
 
-    # 4. TAMBAHKAN BATCH DIMENSION (1, 224, 224, 3)
+    # 4. TAMBAHKAN BATCH DIMENSION
     img_input = np.expand_dims(img_float, axis=0)
 
     # 5. JALANKAN PREDIKSI MODEL
@@ -72,9 +74,9 @@ def predict_image(img_bgr):
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS
+    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS (ORGANIC & RECYCLABLE)
     if pred.shape[-1] == 1:
-        # Format Sigmoid (1 Output Neuron)
+        # Format Sigmoid
         prob = float(pred[0][0])
         if prob > 0.5:
             label = "Recyclable"
@@ -83,7 +85,7 @@ def predict_image(img_bgr):
             label = "Organic"
             confidence = 1.0 - prob
     else:
-        # Format Softmax (2 Output Neuron: [Organic, Recyclable])
+        # Format Softmax 2 Neuron
         prob_organic = float(pred[0][0])
         prob_recyclable = float(pred[0][1])
         if prob_recyclable > prob_organic:
@@ -115,7 +117,7 @@ class VideoProcessor(VideoProcessorBase):
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 # =====================================
-# RENDER PAGE - DESAIN PREMIUM INTERAKTIF & AKSESIBEL
+# RENDER PAGE
 # =====================================
 def render_page():
     st.markdown("""
