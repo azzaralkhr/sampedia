@@ -1,13 +1,13 @@
 import streamlit as st
 import cv2
 import numpy as np
-import tensorflow as tf
+from ai_edge_litert.interpreter import Interpreter
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 import av
 import os
 
 # =====================================
-# LOAD MODEL DENGAN CACHE & BYTE STREAMING
+# LOAD MODEL DENGAN CACHE & MEMORY MAPPING
 # =====================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
@@ -15,7 +15,7 @@ MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
 @st.cache_resource
 def load_tflite_model(model_path):
     """
-    Fungsi aman membaca model via byte stream untuk mencegah error PyCapsule C++.
+    Memuat model TFLite menggunakan Litert Interpreter secara stabil.
     """
     if not os.path.exists(model_path):
         st.error(f"❌ File model tidak ditemukan di path: {model_path}")
@@ -27,32 +27,28 @@ def load_tflite_model(model_path):
         return None
 
     try:
-        # Membaca model sebagai bytes menghindari bug C++ path loader
-        with open(model_path, 'rb') as f:
-            model_content = f.read()
-            
-        interpreter = tf.lite.Interpreter(model_content=model_content)
+        interpreter = Interpreter(model_path=model_path)
         interpreter.allocate_tensors()
         return interpreter
     except Exception as e:
         st.error(f"❌ Gagal menginisialisasi TFLite Interpreter: {e}")
         return None
 
-# Memuat model secara global
+# Memuat model sekali secara global
 interpreter = load_tflite_model(MODEL_PATH)
 
 def predict_image(img_bgr):
     """
-    Fungsi preprocessing (BGR->RGB) dan prediksi 2 Kelas.
+    Preprocessing BGR->RGB dan prediksi 2 kelas (Organic vs Recyclable).
     """
     if interpreter is None:
-        st.error("Model TFLite gagal dimuat. Harap periksa konfigurasi Anda.")
+        st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
         return "Unknown", 0.0
 
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # 1. KONVERSI WARNA BGR (OpenCV) -> RGB (Sangat Krusial)
+    # 1. KONVERSI WARNA: BGR (OpenCV) -> RGB (Sangat Penting untuk Akurasi)
     if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     else:
@@ -74,7 +70,7 @@ def predict_image(img_bgr):
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS (ORGANIC & RECYCLABLE)
+    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS
     if pred.shape[-1] == 1:
         # Format Sigmoid
         prob = float(pred[0][0])
@@ -85,7 +81,7 @@ def predict_image(img_bgr):
             label = "Organic"
             confidence = 1.0 - prob
     else:
-        # Format Softmax 2 Neuron
+        # Format Softmax (2 Output Neuron)
         prob_organic = float(pred[0][0])
         prob_recyclable = float(pred[0][1])
         if prob_recyclable > prob_organic:
