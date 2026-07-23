@@ -15,7 +15,7 @@ MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
 @st.cache_resource
 def load_tflite_model(model_path):
     """
-    Memuat model TFLite menggunakan Litert Interpreter secara stabil.
+    Memuat model TFLite secara akurat.
     """
     if not os.path.exists(model_path):
         st.error(f"❌ File model tidak ditemukan di path: {model_path}")
@@ -37,9 +37,25 @@ def load_tflite_model(model_path):
 # Memuat model sekali secara global
 interpreter = load_tflite_model(MODEL_PATH)
 
+def resnet50_preprocess_input(x):
+    """
+    Implementasi persis tensorflow.keras.applications.resnet50.preprocess_input
+    1. Konversi RGB -> BGR
+    2. Zero-center setiap saluran warna sesuai rata-rata ImageNet:
+       R_mean = 123.68, G_mean = 116.779, B_mean = 103.939
+    """
+    x = x.astype(np.float32)
+    # Konversi RGB ke BGR jika inputnya RGB
+    x = x[..., ::-1]
+    # Kurangi rata-rata ImageNet (skala BGR)
+    x[..., 0] -= 103.939  # B
+    x[..., 1] -= 116.779  # G
+    x[..., 2] -= 123.68   # R
+    return x
+
 def predict_image(img_bgr):
     """
-    Preprocessing BGR->RGB dan prediksi 2 kelas (Organic vs Recyclable).
+    Fungsi prediksi yang disesuaikan persis dengan Notebook Colab Pelatihan.
     """
     if interpreter is None:
         st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
@@ -48,48 +64,35 @@ def predict_image(img_bgr):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # 1. KONVERSI WARNA: BGR (OpenCV) -> RGB (Sangat Penting untuk Akurasi)
+    # 1. Konversi BGR (OpenCV) -> RGB (Sama seperti image.load_img di Keras)
     if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     else:
         img_rgb = img_bgr
 
-    # 2. RESIZE GAMBAR KE 224x224
+    # 2. Resize ke target_size (224, 224)
     img_resized = cv2.resize(img_rgb, (224, 224))
-    img_float = img_resized.astype(np.float32)
     
-    # 3. NORMALISASI PIKSEL (0.0 - 1.0)
-    if img_float.max() > 1.0:
-        img_float = img_float / 255.0
+    # 3. Terapkan Preprocessing khusus ResNet50 (Bukan /255.0)
+    img_preprocessed = resnet50_preprocess_input(img_resized)
 
-    # 4. TAMBAHKAN BATCH DIMENSION
-    img_input = np.expand_dims(img_float, axis=0)
+    # 4. Tambahkan Batch Dimension (axis=0)
+    img_input = np.expand_dims(img_preprocessed, axis=0)
 
-    # 5. JALANKAN PREDIKSI MODEL
+    # 5. Jalankan Ingerensi Model
     interpreter.set_tensor(input_details[0]['index'], img_input)
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS
-    if pred.shape[-1] == 1:
-        # Format Sigmoid
-        prob = float(pred[0][0])
-        if prob > 0.5:
-            label = "Recyclable"
-            confidence = prob
-        else:
-            label = "Organic"
-            confidence = 1.0 - prob
+    # 6. Logika Klasifikasi (Persis dari Colab: prob = float(pred[0][0]))
+    prob = float(pred[0][0])
+
+    if prob > 0.5:
+        label = "Recyclable"
+        confidence = prob
     else:
-        # Format Softmax (2 Output Neuron)
-        prob_organic = float(pred[0][0])
-        prob_recyclable = float(pred[0][1])
-        if prob_recyclable > prob_organic:
-            label = "Recyclable"
-            confidence = prob_recyclable
-        else:
-            label = "Organic"
-            confidence = prob_organic
+        label = "Organic"
+        confidence = 1.0 - prob
 
     return label, confidence
 
