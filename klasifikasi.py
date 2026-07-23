@@ -2,9 +2,21 @@ import streamlit as st
 import cv2
 import numpy as np
 from ai_edge_litert.interpreter import Interpreter
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
 import av
 import os
+
+# =====================================
+# KONFIGURASI RTC (STUN SERVER GOOGLE)
+# =====================================
+# Mencegah dan mengatasi error koneksi WebRTC (STUN/TURN) pada Streamlit Cloud
+RTC_CONFIG = RTCConfiguration(
+    {
+        "iceServers": [
+            {"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]}
+        ]
+    }
+)
 
 # =====================================
 # LOAD MODEL DENGAN CACHE & MEMORY MAPPING
@@ -79,7 +91,7 @@ def predict_image(img_bgr):
     # 4. Tambahkan Batch Dimension (axis=0)
     img_input = np.expand_dims(img_preprocessed, axis=0)
 
-    # 5. Jalankan Ingerensi Model
+    # 5. Jalankan Inferensi Model
     interpreter.set_tensor(input_details[0]['index'], img_input)
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
@@ -261,7 +273,7 @@ def render_page():
     with st.container(border=True):
         pilihan_metode = st.radio(
             "Pilih Metode Masukan Gambar:",
-            ("📷 Kamera Real-time", "📂 Unggah Berkas Foto"),
+            ("📸 Foto Langsung (Kamera HP/Webcam)", "🎥 Stream Kamera WebRTC", "📂 Unggah Berkas Foto"),
             horizontal=True,
             key="pilihan_metode_klasifikasi_baru"
         )
@@ -275,12 +287,27 @@ def render_page():
 
     with col_left:
         with st.container(border=True):
-            if "Kamera" in pilihan_metode:
-                st.markdown("<div class='card-inside-title'>📷 Pengambilan Berbasis Kamera</div>", unsafe_allow_html=True)
+            if "Foto Langsung" in pilihan_metode:
+                st.markdown("<div class='card-inside-title'>📸 Ambil Foto dari Kamera</div>", unsafe_allow_html=True)
+                cam_photo = st.camera_input("Arahkan objek sampah ke kamera lalu klik 'Take Photo'")
+                
+                if cam_photo is not None:
+                    file_bytes = np.asarray(bytearray(cam_photo.read()), dtype=np.uint8)
+                    img_captured = cv2.imdecode(file_bytes, 1)
+                    
+                    with st.spinner("Memproses gambar dari kamera..."):
+                        label, confidence = predict_image(img_captured)
+                        st.session_state.pred_label = label
+                        st.session_state.pred_conf = confidence
+                        st.session_state.pred_img = cv2.cvtColor(img_captured, cv2.COLOR_BGR2RGB)
+
+            elif "Stream Kamera" in pilihan_metode:
+                st.markdown("<div class='card-inside-title'>🎥 Stream Kamera WebRTC</div>", unsafe_allow_html=True)
                 
                 ctx = webrtc_streamer(
-                    key="cam-capture-v3",
+                    key="cam-capture-v4",
                     video_processor_factory=VideoProcessor,
+                    rtc_configuration=RTC_CONFIG,  # Menambahkan STUN configuration
                     media_stream_constraints={
                         "video": {"width": 480, "height": 360},
                         "audio": False
@@ -288,13 +315,13 @@ def render_page():
                 )
                 
                 st.write("") 
-                btn_cam = st.button("✨ Pindai & Analisis Sekarang", key="btn_capture_cam_v3")
+                btn_cam = st.button("✨ Pindai & Analisis Sekarang", key="btn_capture_cam_v4")
                 
                 if btn_cam:
                     if ctx.video_processor:
                         image = ctx.video_processor.crop
                         if image is not None:
-                            with st.spinner("Memproses gambar dari kamera..."):
+                            with st.spinner("Memproses gambar..."):
                                 label, confidence = predict_image(image)
                                 st.session_state.pred_label = label
                                 st.session_state.pred_conf = confidence
@@ -302,18 +329,18 @@ def render_page():
                         else:
                             st.error("Gagal merekam gambar! Harap posisikan objek tepat di dalam batas kotak.")
                     else:
-                        st.info("Klik tombol 'Start' di atas panel untuk menghidupkan kamera perangkat.")
+                        st.info("Klik tombol 'Start' di atas panel untuk menghidupkan kamera.")
 
             else:
                 st.markdown("<div class='card-inside-title'>📂 Unggah File Foto</div>", unsafe_allow_html=True)
-                uploaded_file = st.file_uploader("Pilih gambar dari galeri Anda (.jpg, .png)", type=["jpg", "jpeg", "png"], key="uploader_v3")
+                uploaded_file = st.file_uploader("Pilih gambar dari galeri Anda (.jpg, .png)", type=["jpg", "jpeg", "png"], key="uploader_v4")
                 
                 if uploaded_file is not None:
                     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
                     img_uploaded = cv2.imdecode(file_bytes, 1)
                     
                     st.write("")
-                    btn_upload = st.button("✨ Proses File Unggahan", key="btn_process_upload_v3")
+                    btn_upload = st.button("✨ Proses File Unggahan", key="btn_process_upload_v4")
                     
                     if btn_upload:
                         with st.spinner("Membaca berkas digital..."):
