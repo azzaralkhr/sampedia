@@ -1,7 +1,6 @@
 streamlit
-numpy
-pillow
-tflite-runtime
 opencv-python-headless
-streamlit-webrtc
+numpy
 av
+streamlit-webrtc
+tflite-runtime

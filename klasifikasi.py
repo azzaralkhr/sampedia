@@ -15,15 +15,16 @@ MODEL_PATH = os.path.join(BASE_DIR, "BO_Resnet_5class.tflite")
 @st.cache_resource
 def load_tflite_model(model_path):
     """
-    Fungsi aman untuk memuat model TFLite.
+    Fungsi aman untuk memuat model TFLite 2 Kelas.
     Menggunakan st.cache_resource agar model hanya di-load 1 kali ke memori.
     """
     if not os.path.exists(model_path):
         st.error(f"❌ File model tidak ditemukan di path: {model_path}")
         return None
     
-    # Cek apakah ukuran file valid (tidak 0 byte / corrupt)
-    if os.path.getsize(model_path) < 1000:
+    # Cek apakah ukuran file valid (tidak corrupt)
+    file_size = os.path.getsize(model_path)
+    if file_size < 1000:
         st.error("❌ File model `.tflite` rusak atau terpotong saat di-upload ke GitHub.")
         return None
 
@@ -35,10 +36,13 @@ def load_tflite_model(model_path):
         st.error(f"❌ Gagal menginisialisasi TFLite Interpreter: {e}")
         return None
 
-# Memuat model
+# Memuat model sekali secara global
 interpreter = load_tflite_model(MODEL_PATH)
 
-def predict_image(img):
+def predict_image(img_bgr):
+    """
+    Fungsi preprocessing dan inferensi khusus model 2 Kelas (Organic / Recyclable).
+    """
     if interpreter is None:
         st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
         return "Unknown", 0.0
@@ -46,20 +50,31 @@ def predict_image(img):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    img = cv2.resize(img, (224, 224))
-    img = img.astype(np.float32)
-    
-    # Normalisasi piksel jika diperlukan oleh model
-    if img.max() > 1.0:
-        img = img / 255.0
+    # 1. KONVERSI WARNA: BGR (OpenCV) -> RGB (Sangat Penting untuk Akurasi)
+    if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    else:
+        img_rgb = img_bgr
 
-    img = np.expand_dims(img, axis=0)
-    interpreter.set_tensor(input_details[0]['index'], img)
+    # 2. RESIZE GAMBAR KE INPUT MODEL (224x224)
+    img_resized = cv2.resize(img_rgb, (224, 224))
+    img_float = img_resized.astype(np.float32)
+    
+    # 3. NORMALISASI PIKSEL (0.0 - 1.0)
+    if img_float.max() > 1.0:
+        img_float = img_float / 255.0
+
+    # 4. TAMBAHKAN BATCH DIMENSION (1, 224, 224, 3)
+    img_input = np.expand_dims(img_float, axis=0)
+
+    # 5. JALANKAN PREDIKSI MODEL
+    interpreter.set_tensor(input_details[0]['index'], img_input)
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # Logika fleksibel untuk model 2 Kelas (Binary)
+    # 6. LOGIKA HASIL KLASIFIKASI 2 KELAS
     if pred.shape[-1] == 1:
+        # Format Sigmoid (1 Output Neuron)
         prob = float(pred[0][0])
         if prob > 0.5:
             label = "Recyclable"
@@ -68,7 +83,7 @@ def predict_image(img):
             label = "Organic"
             confidence = 1.0 - prob
     else:
-        # Jika layer output berupa 2 neuron (Softmax/Argmax)
+        # Format Softmax (2 Output Neuron: [Organic, Recyclable])
         prob_organic = float(pred[0][0])
         prob_recyclable = float(pred[0][1])
         if prob_recyclable > prob_organic:
@@ -103,10 +118,8 @@ class VideoProcessor(VideoProcessorBase):
 # RENDER PAGE - DESAIN PREMIUM INTERAKTIF & AKSESIBEL
 # =====================================
 def render_page():
-    # INJEKSI CSS MODERN DENGAN UKURAN TEKS DIPERBESAR
     st.markdown("""
     <style>
-    /* Reset Font Global & Judul */
     html, body, [data-testid="stAppViewContainer"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -127,7 +140,6 @@ def render_page():
         font-weight: 500;
     }
     
-    /* Teks Pilihan Metode Radio Button */
     div[data-testid="stRadio"] label {
         color: #0f172a !important; 
         font-size: 17px !important;
@@ -139,7 +151,6 @@ def render_page():
         font-size: 17px !important;
     }
     
-    /* Container Wadah Utama */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background: #ffffff !important;
         border-radius: 16px !important;
@@ -149,7 +160,6 @@ def render_page():
         margin-bottom: 20px !important;
     }
     
-    /* Penataan Judul Kartu */
     .card-inside-title {
         font-size: 20px;
         font-weight: 800;
@@ -159,7 +169,6 @@ def render_page():
         padding-bottom: 10px;
     }
     
-    /* Memaksa Tampilan Gambar Deteksi Proporsional */
     div[data-testid="stImage"] img {
         width: 100% !important;
         max-width: 240px !important;
@@ -171,7 +180,6 @@ def render_page():
         display: block;
     }
     
-    /* Tombol Aksi Keren Eksklusif Hijau */
     .stButton > button {
         width: 100% !important;
         height: 50px !important;
@@ -190,7 +198,6 @@ def render_page():
         transform: translateY(-1px);
     }
 
-    /* Container Edukasi Penanggulangan Banjir */
     .banjir-container {
         background: #f0fdf4;
         border-left: 5px solid #16a34a;
@@ -208,7 +215,6 @@ def render_page():
         margin-bottom: 6px;
     }
 
-    /* Container Rekomendasi Alur Tindakan */
     .rekomendasi-container {
         background: #f8fafc;
         border-left: 5px solid #475569;
@@ -226,7 +232,6 @@ def render_page():
         margin-bottom: 8px;
     }
     
-    /* Placeholder Menunggu Hasil */
     .placeholder-result {
         border: 2px dashed #cbd5e1;
         padding: 70px 20px;
@@ -238,7 +243,6 @@ def render_page():
         line-height: 1.6;
     }
 
-    /* Penyesuaian Komponen Expander */
     .stDetails summary {
         font-size: 16px !important;
         font-weight: 700 !important;
@@ -253,7 +257,6 @@ def render_page():
     st.markdown("<div class='title'>♻️ Klasifikasi Jenis Sampah</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub'>Gunakan salah satu fitur di bawah ini untuk mengidentifikasi kategori sampah Anda secara otomatis.</div>", unsafe_allow_html=True)
 
-    # Wadah Pilihan Utama
     with st.container(border=True):
         pilihan_metode = st.radio(
             "Pilih Metode Masukan Gambar:",
@@ -269,7 +272,6 @@ def render_page():
 
     col_left, col_right = st.columns(2)
 
-    # --- PANEL SEBELAH KIRI (WADAH INPUT) ---
     with col_left:
         with st.container(border=True):
             if "Kamera" in pilihan_metode:
@@ -319,12 +321,11 @@ def render_page():
                             st.session_state.pred_conf = confidence_up
                             st.session_state.pred_img = cv2.cvtColor(img_uploaded, cv2.COLOR_BGR2RGB)
 
-    # --- PANEL SEBELAH KANAN (HASIL & PANDUAN) ---
     with col_right:
         with st.container(border=True):
             st.markdown("<div class='card-inside-title'>📊 Dashboard Hasil & Aksi</div>", unsafe_allow_html=True)
             
-            if st.session_state.pred_label is not None:
+            if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
                 st.image(st.session_state.pred_img, caption="Foto Objek Dideteksi", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
