@@ -3,14 +3,6 @@ import cv2
 import numpy as np
 from ai_edge_litert.interpreter import Interpreter
 import os
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, WebRtcMode, RTCConfiguration
-
-# =====================================
-# RTC CONFIGURATION FOR CLOUD DEPLOY
-# =====================================
-RTC_CONFIG = RTCConfiguration({
-    "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-})
 
 # =====================================
 # LOAD MODEL DENGAN CACHE & MEMORY MAPPING
@@ -64,12 +56,13 @@ def predict_image(img_bgr):
     Fungsi prediksi yang disesuaikan persis dengan Notebook Colab Pelatihan.
     """
     if interpreter is None:
+        st.error("Model TFLite gagal dimuat. Harap periksa file model Anda.")
         return "Unknown", 0.0
 
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # 1. Konversi BGR (OpenCV) -> RGB
+    # 1. Konversi BGR (OpenCV) -> RGB (Sama seperti image.load_img di Keras)
     if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     else:
@@ -78,7 +71,7 @@ def predict_image(img_bgr):
     # 2. Resize ke target_size (224, 224)
     img_resized = cv2.resize(img_rgb, (224, 224))
     
-    # 3. Terapkan Preprocessing khusus ResNet50
+    # 3. Terapkan Preprocessing khusus ResNet50 (Bukan /255.0)
     img_preprocessed = resnet50_preprocess_input(img_resized)
 
     # 4. Tambahkan Batch Dimension (axis=0)
@@ -89,7 +82,7 @@ def predict_image(img_bgr):
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # 6. Logika Klasifikasi
+    # 6. Logika Klasifikasi (Persis dari Colab: prob = float(pred[0][0]))
     prob = float(pred[0][0])
 
     if prob > 0.5:
@@ -103,9 +96,12 @@ def predict_image(img_bgr):
 
 def crop_center_box(img_bgr, target_size=224):
     """
-    Memotong (crop) bagian tengah berukuran 224x224 piksel
+    Memotong (crop) tepat di bagian tengah gambar berukuran target_size x target_size (224x224).
+    Jika ukuran gambar lebih kecil dari target_size, lakukan penyesuaian otomatis.
     """
     h, w, _ = img_bgr.shape
+    
+    # Menentukan ukuran crop (maksimal selebar/setinggi gambar jika terlalu kecil)
     box_w = min(w, target_size)
     box_h = min(h, target_size)
     
@@ -114,43 +110,9 @@ def crop_center_box(img_bgr, target_size=224):
     x2 = x1 + box_w
     y2 = y1 + box_h
     
-    return img_bgr[y1:y2, x1:x2]
-
-# =====================================
-# WEBRTC VIDEO TRANSFORMER DENGAN OVERLAY KOTAK
-# =====================================
-class WasteClassifierTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.latest_frame = None
-
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        h, w, _ = img.shape
-
-        # Tentukan posisi kotak 224x224 di tengah layar live webcam
-        box_w, box_h = 224, 224
-        x1 = max(0, w // 2 - box_w // 2)
-        y1 = max(0, h // 2 - box_h // 2)
-        x2 = min(w, x1 + box_w)
-        y2 = min(h, y1 + box_h)
-
-        # Simpan frame asli untuk diproses saat tombol dipencet
-        self.latest_frame = img.copy()
-
-        # Gambar Bounding Box Hijau & Teks Panduan pada Tampilan Kamera
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-        cv2.putText(
-            img, 
-            "Arahkan Sampah Ke Sini", 
-            (x1 - 10, y1 - 15), 
-            cv2.FONT_HERSHEY_SIMPLEX, 
-            0.7, 
-            (0, 255, 0), 
-            2, 
-            cv2.LINE_AA
-        )
-
-        return img
+    # Lakukan cropping tepat di area tengah 224x224
+    cropped_img = img_bgr[y1:y2, x1:x2]
+    return cropped_img
 
 # =====================================
 # RENDER PAGE
@@ -313,36 +275,23 @@ def render_page():
     with col_left:
         with st.container(border=True):
             if "Kamera HP/Webcam" in pilihan_metode:
-                st.markdown("<div class='card-inside-title'>📸 Live Kamera Webcam</div>", unsafe_allow_html=True)
-                st.info("💡 **Petunjuk:** Arahkan objek sampah ke dalam **kotak hijau**, lalu klik tombol **Klasifikasikan Sampah** di bawah video.")
+                st.markdown("<div class='card-inside-title'>📸 Tangkap Foto dari Kamera</div>", unsafe_allow_html=True)
+                st.info("💡 **Petunjuk:** Arahkan objek sampah ke tengah layar, lalu tekan **Take Photo**. Sistem akan memotong (*crop*) otomatis area tengah 224x224 piksel.")
                 
-                # Menampilkan Stream Webcam beserta Bounding Box Hijau secara Real-time
-                ctx = webrtc_streamer(
-                    key="waste-classifier",
-                    mode=WebRtcMode.SENDRECV,
-                    rtc_configuration=RTC_CONFIG,
-                    video_transformer_factory=WasteClassifierTransformer,
-                    media_stream_constraints={"video": True, "audio": False},
-                    async_processing=True
-                )
-
-                st.write("")
-                btn_capture = st.button("📸 Klasifikasikan Sampah dalam Kotak", key="btn_capture_webrtc")
-
-                if btn_capture:
-                    if ctx.video_transformer and ctx.video_transformer.latest_frame is not None:
-                        # Ambil frame mentah
-                        img_raw = ctx.video_transformer.latest_frame
-                        # Potong tepat 224x224 di tengah
-                        img_cropped = crop_center_box(img_raw, target_size=224)
-                        
-                        with st.spinner("Menganalisis area kotak..."):
-                            label, confidence = predict_image(img_cropped)
-                            st.session_state.pred_label = label
-                            st.session_state.pred_conf = confidence
-                            st.session_state.pred_img = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2RGB)
-                    else:
-                        st.warning("⚠️ Kamera belum aktif atau belum siap. Silakan klik 'START' pada panel kamera terlebih dahulu.")
+                cam_photo = st.camera_input("Ambil Foto Sampah")
+                
+                if cam_photo is not None:
+                    file_bytes = np.asarray(bytearray(cam_photo.read()), dtype=np.uint8)
+                    img_captured = cv2.imdecode(file_bytes, 1)
+                    
+                    # Potong bagian tengah berukuran 224x224
+                    img_cropped = crop_center_box(img_captured, target_size=224)
+                    
+                    with st.spinner("Memproses potongan gambar (224x224)..."):
+                        label, confidence = predict_image(img_cropped)
+                        st.session_state.pred_label = label
+                        st.session_state.pred_conf = confidence
+                        st.session_state.pred_img = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2RGB)
 
             else:
                 st.markdown("<div class='card-inside-title'>📂 Unggah File Foto</div>", unsafe_allow_html=True)
@@ -367,7 +316,7 @@ def render_page():
             st.markdown("<div class='card-inside-title'>📊 Dashboard Hasil & Aksi</div>", unsafe_allow_html=True)
             
             if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
-                st.image(st.session_state.pred_img, caption="Hasil Cropping Area Kotak (224x224)", use_container_width=False)
+                st.image(st.session_state.pred_img, caption="Hasil Cropping 224x224 piksel", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
                     st.markdown(f"""
