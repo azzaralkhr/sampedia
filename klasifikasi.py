@@ -2,21 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 from ai_edge_litert.interpreter import Interpreter
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
-import av
 import os
-
-# =====================================
-# KONFIGURASI RTC (STUN SERVER GOOGLE)
-# =====================================
-# Mencegah dan mengatasi error koneksi WebRTC (STUN/TURN) pada Streamlit Cloud
-RTC_CONFIG = RTCConfiguration(
-    {
-        "iceServers": [
-            {"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]}
-        ]
-    }
-)
 
 # =====================================
 # LOAD MODEL DENGAN CACHE & MEMORY MAPPING
@@ -108,24 +94,25 @@ def predict_image(img_bgr):
 
     return label, confidence
 
-class VideoProcessor(VideoProcessorBase):
-    def __init__(self):
-        self.crop = None
-
-    def recv(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        h, w, _ = img.shape
-        box_size = 220
-        x1 = w // 2 - box_size // 2
-        y1 = h // 2 - box_size // 2
-        x2 = x1 + box_size
-        y2 = y1 + box_size
-
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-        cv2.putText(img, "Arahkan Sampah", (x1 + 5, y1 - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-        
-        self.crop = img[y1:y2, x1:x2]
-        return av.VideoFrame.from_ndarray(img, format="bgr24")
+def crop_center_box(img_bgr, target_size=224):
+    """
+    Memotong (crop) tepat di bagian tengah gambar berukuran target_size x target_size (224x224).
+    Jika ukuran gambar lebih kecil dari target_size, lakukan penyesuaian otomatis.
+    """
+    h, w, _ = img_bgr.shape
+    
+    # Menentukan ukuran crop (maksimal selebar/setinggi gambar jika terlalu kecil)
+    box_w = min(w, target_size)
+    box_h = min(h, target_size)
+    
+    x1 = w // 2 - box_w // 2
+    y1 = h // 2 - box_h // 2
+    x2 = x1 + box_w
+    y2 = y1 + box_h
+    
+    # Lakukan cropping tepat di area tengah 224x224
+    cropped_img = img_bgr[y1:y2, x1:x2]
+    return cropped_img
 
 # =====================================
 # RENDER PAGE
@@ -273,7 +260,7 @@ def render_page():
     with st.container(border=True):
         pilihan_metode = st.radio(
             "Pilih Metode Masukan Gambar:",
-            ("📸 Foto Langsung (Kamera HP/Webcam)", "🎥 Stream Kamera WebRTC", "📂 Unggah Berkas Foto"),
+            ("📸 Kamera HP/Webcam", "📂 Unggah Berkas Foto"),
             horizontal=True,
             key="pilihan_metode_klasifikasi_baru"
         )
@@ -287,49 +274,24 @@ def render_page():
 
     with col_left:
         with st.container(border=True):
-            if "Foto Langsung" in pilihan_metode:
-                st.markdown("<div class='card-inside-title'>📸 Ambil Foto dari Kamera</div>", unsafe_allow_html=True)
-                cam_photo = st.camera_input("Arahkan objek sampah ke kamera lalu klik 'Take Photo'")
+            if "Kamera HP/Webcam" in pilihan_metode:
+                st.markdown("<div class='card-inside-title'>📸 Tangkap Foto dari Kamera</div>", unsafe_allow_html=True)
+                st.info("💡 **Petunjuk:** Arahkan objek sampah ke tengah layar, lalu tekan **Take Photo**. Sistem akan memotong (*crop*) otomatis area tengah 224x224 piksel.")
+                
+                cam_photo = st.camera_input("Ambil Foto Sampah")
                 
                 if cam_photo is not None:
                     file_bytes = np.asarray(bytearray(cam_photo.read()), dtype=np.uint8)
                     img_captured = cv2.imdecode(file_bytes, 1)
                     
-                    with st.spinner("Memproses gambar dari kamera..."):
-                        label, confidence = predict_image(img_captured)
+                    # Potong bagian tengah berukuran 224x224
+                    img_cropped = crop_center_box(img_captured, target_size=224)
+                    
+                    with st.spinner("Memproses potongan gambar (224x224)..."):
+                        label, confidence = predict_image(img_cropped)
                         st.session_state.pred_label = label
                         st.session_state.pred_conf = confidence
-                        st.session_state.pred_img = cv2.cvtColor(img_captured, cv2.COLOR_BGR2RGB)
-
-            elif "Stream Kamera" in pilihan_metode:
-                st.markdown("<div class='card-inside-title'>🎥 Stream Kamera WebRTC</div>", unsafe_allow_html=True)
-                
-                ctx = webrtc_streamer(
-                    key="cam-capture-v4",
-                    video_processor_factory=VideoProcessor,
-                    rtc_configuration=RTC_CONFIG,  # Menambahkan STUN configuration
-                    media_stream_constraints={
-                        "video": {"width": 480, "height": 360},
-                        "audio": False
-                    }
-                )
-                
-                st.write("") 
-                btn_cam = st.button("✨ Pindai & Analisis Sekarang", key="btn_capture_cam_v4")
-                
-                if btn_cam:
-                    if ctx.video_processor:
-                        image = ctx.video_processor.crop
-                        if image is not None:
-                            with st.spinner("Memproses gambar..."):
-                                label, confidence = predict_image(image)
-                                st.session_state.pred_label = label
-                                st.session_state.pred_conf = confidence
-                                st.session_state.pred_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                        else:
-                            st.error("Gagal merekam gambar! Harap posisikan objek tepat di dalam batas kotak.")
-                    else:
-                        st.info("Klik tombol 'Start' di atas panel untuk menghidupkan kamera.")
+                        st.session_state.pred_img = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2RGB)
 
             else:
                 st.markdown("<div class='card-inside-title'>📂 Unggah File Foto</div>", unsafe_allow_html=True)
@@ -354,7 +316,7 @@ def render_page():
             st.markdown("<div class='card-inside-title'>📊 Dashboard Hasil & Aksi</div>", unsafe_allow_html=True)
             
             if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
-                st.image(st.session_state.pred_img, caption="Foto Objek Dideteksi", use_container_width=False)
+                st.image(st.session_state.pred_img, caption="Hasil Cropping 224x224 piksel", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
                     st.markdown(f"""
