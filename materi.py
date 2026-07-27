@@ -10,7 +10,7 @@ def get_base64_image(image_path):
     return ""
 
 def render_page():
-    # --- CSS CUSTOM UNTUK MENIRU DESAIN MOCKUP 2 (LEBIH HIDUP, PREMIUM & TERCERNA) ---
+    # --- CSS CUSTOM UNTUK MENIRU DESAIN MOCKUP & MENAMBAHKAN ELEMEN EDUKASI BARU ---
     st.markdown("""
     <style>
         /* Mengatur font global agar bersih */
@@ -65,7 +65,6 @@ def render_page():
         }
 
         /* --- MAIN CONTENT STYLE --- */
-        /* Hero Banner Premium disesuaikan dengan gambar ke-2 */
         .hero-banner {
             background: linear-gradient(135deg, #0b4632 0%, #156347 100%);
             border-radius: 20px;
@@ -91,9 +90,8 @@ def render_page():
             text-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         
-        /* Deskripsi dibuat lebih besar, tebal, dan warna mencolok putih bersih */
         .hero-desc {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 500;
             color: #ffffff !important;
             line-height: 1.7;
@@ -132,7 +130,7 @@ def render_page():
             border-left: 4px solid #d97706;
         }
 
-        /* Karakteristik Cards dibuat lebih hidup & readable */
+        /* Karakteristik Cards */
         .karakter-card {
             background: white;
             border: 1px solid #e2e8f0;
@@ -185,7 +183,7 @@ def render_page():
             line-height: 1.4;
         }
 
-        /* Contoh Cards Premium sesuai mockup */
+        /* Contoh Cards Premium */
         .contoh-card-container {
             background: white;
             border: 1px solid #e2e8f0;
@@ -222,6 +220,43 @@ def render_page():
             line-height: 1.4;
         }
 
+        /* Dosis & Don'ts Box Style */
+        .dos-donts-box {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            height: 100%;
+        }
+
+        .dos-title {
+            color: #166534;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .donts-title {
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dos-list, .donts-list {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
         /* Tips & Ringkasan Box */
         .tips-container {
             background: white;
@@ -239,7 +274,7 @@ def render_page():
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: #1e293b;
             font-weight: 500;
         }
@@ -268,7 +303,7 @@ def render_page():
         .ringkasan-list {
             margin: 0;
             padding-left: 20px;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: #334155;
             line-height: 1.6;
         }
@@ -326,29 +361,28 @@ def render_page():
         # Section "Tahukah Kamu?"
         st.markdown('<div class="tahu-box">', unsafe_allow_html=True)
         if st.session_state.materi_aktif == "Sampah Organik":
-            st.markdown('<div class="tahu-title">🟢 Tahukah Kamu?</div>', unsafe_allow_html=True)
+            st.markdown('<div class="tahu-title">🟢 Mengapa Pemilahan Penting?</div>', unsafe_allow_html=True)
             if os.path.exists("assets/images/tong_organik.png"):
                 st.image("assets/images/tong_organik.png", use_container_width=True, output_format="PNG")
-            st.markdown('<p style="font-size:0.83rem; color:#475569; line-height:1.5; margin-top:8px; margin-bottom:0;">Sampah organik jika dikelola dengan baik dapat menjadi kompos yang bermanfaat untuk menyuburkan tanaman dan mengurangi volume sampah di lingkungan kita.</p>', unsafe_allow_html=True)
+            st.markdown('<p style="font-size:0.83rem; color:#475569; line-height:1.5; margin-top:8px; margin-bottom:0;">Sampah organik yang tercampur dengan plastik di TPA memicu gas metana berbahaya (penyebab ledakan/kebakaran TPA) dan timbulnya air lindi berbau busuk yang mencemari air sumur warga.</p>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="tahu-title" style="color: #ca8a04;">🟡 Tahukah Kamu?</div>', unsafe_allow_html=True)
+            st.markdown('<div class="tahu-title" style="color: #ca8a04;">🟡 Mengapa Pemilahan Penting?</div>', unsafe_allow_html=True)
             if os.path.exists("assets/images/tong_anorganik.png"):
                 st.image("assets/images/tong_anorganik.png", use_container_width=True, output_format="PNG")
-            st.markdown('<p style="font-size:0.83rem; color:#475569; line-height:1.5; margin-top:8px; margin-bottom:0;">Sampah anorganik membutuhkan waktu sangat lama untuk terurai secara alami. Namun, sampah ini dapat didaur ulang menjadi produk baru yang bermanfaat.</p>', unsafe_allow_html=True)
+            st.markdown('<p style="font-size:0.83rem; color:#475569; line-height:1.5; margin-top:8px; margin-bottom:0;">Plastik butuh waktu hingga 500 tahun untuk hancur. Sampah anorganik yang dibuang sembarangan pecah menjadi mikroplastik yang mencemari lautan dan dapat masuk ke dalam rantai makanan manusia.</p>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 
     # --- HALAMAN 1: SAMPAH ORGANIK ---
     if st.session_state.materi_aktif == "Sampah Organik":
-        # Mengonversi gambar Organik lokal ke Base64 agar tampil lancar di HTML
         img_base64_org = get_base64_image("assets/images/Organik.png")
         
-        # 1. Hero Banner Utama dengan Gambar Ilustrasi Wadah Sampah Organik Melimpah
+        # 1. Hero Banner Utama
         st.markdown(f"""
         <div class="hero-banner">
             <div class="hero-text">
                 <h2 class="hero-title">1. Sampah Organik</h2>
-                <p class="hero-desc">Sampah organik adalah sampah yang berasal dari makhluk hidup dan dapat terurai secara alami oleh mikroorganisme. Sampah ini ramah lingkungan dan dapat diolah menjadi kompos atau pupuk alami.</p>
+                <p class="hero-desc">Sampah organik adalah sampah yang berasal dari sisa makhluk hidup dan dapat terurai secara alami oleh mikroorganisme. Jika dipilah dengan benar, sampah ini sangat ramah lingkungan dan kaya nutrisi untuk dijadikan kompos pupuk alami.</p>
             </div>
             <div class="hero-image-container">
                 <img src="{img_base64_org}" alt="Sampah Organik">
@@ -357,78 +391,106 @@ def render_page():
         """, unsafe_allow_html=True)
         
         # 2. Karakteristik Sampah Organik
-        st.markdown('<div class="section-title">Characteristics / Karakteristik Sampah Organik</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Karakteristik Utama Sampah Organik</div>', unsafe_allow_html=True)
         k_col1, k_col2, k_col3, k_col4 = st.columns(4)
         with k_col1:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🌱</div><div class="karakter-info-box"><div class="karakter-header">Mudah Terurai</div><div class="karakter-body">Dapat terurai secara alami dalam hitungan hari hingga minggu.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🌱</div><div class="karakter-info-box"><div class="karakter-header">Mudah Terurai</div><div class="karakter-body">Hancur alami dalam hitungan hari hingga beberapa minggu saja.</div></div></div>""", unsafe_allow_html=True)
         with k_col2:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon">♻️</div><div class="karakter-info-box"><div class="karakter-header">Ramah Lingkungan</div><div class="karakter-body">Tidak mencemari tanah, air, and udara serta aman bagi makhluk hidup.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon">♻️</div><div class="karakter-header">Ramah Lingkungan</div><div class="karakter-body">Tidak mencemari tanah, air, dan udara jika dikelola secara terpisah.</div></div></div>""", unsafe_allow_html=True)
         with k_col3:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🪴</div><div class="karakter-info-box"><div class="karakter-header">Bermanfaat</div><div class="karakter-body">Dapat diolah menjadi kompos atau pupuk untuk tanaman.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🪴</div><div class="karakter-info-box"><div class="karakter-header">Bernilai Manfaat</div><div class="karakter-body">Sangat baik diolah menjadi kompos, pakan maggot, atau pupuk organik.</div></div></div>""", unsafe_allow_html=True)
         with k_col4:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🕒</div><div class="karakter-info-box"><div class="karakter-header">Waktu Terurai</div><div class="karakter-body">Beberapa hari hingga beberapa minggu tergantung jenisnya.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon">🕒</div><div class="karakter-info-box"><div class="karakter-header">Waktu Terurai</div><div class="karakter-body">Antara 1 hingga 4 minggu tergantung kelembapan udara.</div></div></div>""", unsafe_allow_html=True)
             
         # 3. Contoh Sampah Organik Grid (5 Kolom)
-        st.markdown('<div class="section-title">Contoh Sampah Organik</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Contoh Sampah Organik Sehari-hari</div>', unsafe_allow_html=True)
         c_col1, c_col2, c_col3, c_col4, c_col5 = st.columns(5)
         
         with c_col1:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/sisa_sayur.webp", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Sisa Sayuran & Buah</div><div class="contoh-desc">Sisa potongan sayur, kulit buah, and buah busuk termasuk sampah organik.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Sisa Sayuran & Buah</div><div class="contoh-desc">Potongan kulit buah, sayur layu, dan sisa racikan dapur.</div></div></div>', unsafe_allow_html=True)
             
         with c_col2:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/daun_kering.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Daun Kering & Ranting</div><div class="contoh-desc">Daun kering dan ranting dapat terurai alami dan menyuburkan tanah.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Daun & Ranting Kering</div><div class="contoh-desc">Guguran daun halaman dan ranting kecil kaya unsur karbon.</div></div></div>', unsafe_allow_html=True)
             
         with c_col3:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/sisa_makanan.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Sisa Tulang & Nasi</div><div class="contoh-desc">Sisa makanan seperti nasi dan tulang hewan bisa menjadi pakan ternak.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Sisa Tulang & Nasi</div><div class="contoh-desc">Sisa lauk pauk dan nasi meja makan yang dapat diolah kembali.</div></div></div>', unsafe_allow_html=True)
             
         with c_col4:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/ampas_kopi.webp", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Ampas Kopi / Teh</div><div class="contoh-desc">Ampas kopi dan teh dapat digunakan sebagai pupuk alami penyubur.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Ampas Kopi & Teh</div><div class="contoh-desc">Sisa seduhan kopi dan kantong teh celup bebas plastik.</div></div></div>', unsafe_allow_html=True)
             
         with c_col5:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/kulit_telur.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Kulit Telur</div><div class="contoh-desc">Kulit telur dapat diolah menjadi pupuk organik kaya kalsium untuk tanaman.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Kulit Telur</div><div class="contoh-desc">Cangkang telur kaya kalsium tinggi untuk menyuburkan tanah.</div></div></div>', unsafe_allow_html=True)
 
-        # 4. Tips Pengelolaan & Ringkasan Materi (Baris Kompak)
-        b_col1, b_col2 = st.columns([1, 1])
-        
-        with b_col1:
-            st.markdown('<div class="section-title">🧺 Tips Pengelolaan</div>', unsafe_allow_html=True)
+        # 4. FITUR BARU: Boleh vs Jangan Masuk Kompos (Do's & Don'ts)
+        st.markdown('<div class="section-title">⚠️ Panduan Pemilahan Pengomposan Rumah Tangga</div>', unsafe_allow_html=True)
+        dd_col1, dd_col2 = st.columns(2)
+        with dd_col1:
             st.markdown("""
-            <div class="tips-container">
-                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">🗑️</div><span>Pisahkan sampah organik dari sampah anorganik.</span></div>
-                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">📦</div><span>Kumpulkan sampah organik di wadah tertutup.</span></div>
-                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">🍃</div><span>Olah menjadi kompos secara rutin.</span></div>
+            <div class="dos-donts-box" style="border-left: 4px solid #166534;">
+                <div class="dos-title">✅ Boleh Dimasukkan ke Kompos</div>
+                <ul class="dos-list">
+                    <li>Sisa potongan buah, kulit buah, dan sayuran dapur.</li>
+                    <li>Ampas kopi, serbuk gergaji kayu, dan daun-daunan kering.</li>
+                    <li>Cangkang telur yang sudah dihancurkan kasar.</li>
+                    <li>Kertas koran polos atau tisu tanpa bahan kimia pekat.</li>
+                </ul>
             </div>
             """, unsafe_allow_html=True)
-            
-        with b_col2:
-            st.markdown('<div class="section-title">📋 Ringkasan Materi</div>', unsafe_allow_html=True)
+        with dd_col2:
             st.markdown("""
-            <div class="ringkasan-box">
-                <ul class="ringkasan-list">
-                    <li>Sampah organik berasal dari makhluk hidup.</li>
-                    <li>Mudah terurai dan ramah lingkungan.</li>
-                    <li>Dapat diolah menjadi kompos atau pupuk alami.</li>
-                    <li>Manfaatnya besar untuk lingkungan dan tanaman.</li>
+            <div class="dos-donts-box" style="border-left: 4px solid #991b1b;">
+                <div class="donts-title">❌ Hindari Masuk Kompos Rutin</div>
+                <ul class="donts-list">
+                    <li><strong>Minyak Goreng Bekas / Jelantah:</strong> Membunuh bakteri pengurai & memicu bau busuk.</li>
+                    <li><strong>Daging Berlemak & Tulang Besar:</strong> Mengundang tikus, lalat, dan belatung berbahaya.</li>
+                    <li><strong>Kotoran Hewan Peliharaan (Kucing/Anjing):</strong> Berisiko membawa parasit/bakteri berbahaya.</li>
+                    <li><strong>Tanaman Terserang Hama:</strong> Berpotensi menularkan penyakit ke tanaman baru.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
 
-        # 5. Bottom Navigation Bar
+        # 5. Langkah Konkret Pengelolaan & Ringkasan Materi
+        b_col1, b_col2 = st.columns([1, 1])
+        
+        with b_col1:
+            st.markdown('<div class="section-title">🧺 Langkah Praktis Pengelolaan di Rumah</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="tips-container">
+                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">1️⃣</div><span><strong>Pisahkan Langsung:</strong> Sediakan tempat sampah khusus organik berpenutup di dekat dapur.</span></div>
+                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">2️⃣</div><span><strong>Tiriskan Air:</strong> Pastikan sisa makanan tidak terlalu berair untuk mencegah bau menyengat.</span></div>
+                <div class="tips-item"><div class="tips-badge" style="background:#e8f5e9; color:#2e7d32;">3️⃣</div><span><strong>Olah Sederhana:</strong> Masukkan ke ember komposter atau buat lubang biopori sederhana di pekarangan.</span></div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with b_col2:
+            st.markdown('<div class="section-title">📋 Ringkasan Poin Penting</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="ringkasan-box">
+                <ul class="ringkasan-list">
+                    <li>Sampah organik berasal murni dari sisa makhluk hidup.</li>
+                    <li>Proses penguraiannya alami, cepat, dan tidak merusak lingkungan.</li>
+                    <li>Dapat diubah menjadi kompos kaya nutrisi bagi tanah dan tanaman.</li>
+                    <li>Memilah sampah organik secara mandiri memangkas 60% beban volume sampah di TPA.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 6. Bottom Navigation Bar
         st.markdown("""
         <div class="bottom-nav-box">
             <div class="bottom-nav-text">
                 <span>📖</span>
-                <span>Pahami jenis sampah lainnya dan cara pengelolaannya dengan benar untuk lingkungan yang lebih bersih!</span>
+                <span>Lanjutkan edukasi untuk memahami jenis sampah anorganik dan cara penanganannya!</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -442,15 +504,14 @@ def render_page():
 
     # --- HALAMAN 2: SAMPAH ANORGANIK ---
     elif st.session_state.materi_aktif == "Sampah Anorganik":
-        # PERBAIKAN UTAMA: Mengonversi gambar Anorganik lokal ke Base64 dengan path yang benar
         img_base64_anorg = get_base64_image("assets/images/Anorganik.png")
 
-        # 1. Hero Banner Anorganik Utama dengan Gambar Ilustrasi Wadah Sampah Anorganik
+        # 1. Hero Banner Anorganik Utama
         st.markdown(f"""
         <div class="hero-banner" style="background: linear-gradient(135deg, #7c2d12 0%, #b45309 100%); box-shadow: 0 4px 15px rgba(124, 45, 18, 0.15);">
             <div class="hero-text">
                 <h2 class="hero-title">2. Sampah Anorganik</h2>
-                <p class="hero-desc">Sampah anorganik adalah sampah yang berasal dari bahan-bahan sintetis atau non-hayati yang sulit atau tidak dapat terurai secara alami. Sampah ini membutuhkan waktu ratusan tahun untuk terurai.</p>
+                <p class="hero-desc">Sampah anorganik adalah sampah yang berasal dari bahan sintetis atau olahan non-hayati yang sangat sulit hingga tidak bisa terurai alami. Perlu pengelolaan daur ulang agar tidak menumpuk ratusan tahun di bumi.</p>
             </div>
             <div class="hero-image-container">
                 <img src="{img_base64_anorg}" alt="Sampah Anorganik">
@@ -459,78 +520,106 @@ def render_page():
         """, unsafe_allow_html=True)
         
         # 2. Karakteristik Sampah Anorganik
-        st.markdown('<div class="section-title anorganik">Karakteristik Sampah Anorganik</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title anorganik">Karakteristik Utama Sampah Anorganik</div>', unsafe_allow_html=True)
         k_col1, k_col2, k_col3, k_col4 = st.columns(4)
         with k_col1:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">⏳</div><div class="karakter-info-box"><div class="karakter-header">Sulit Terurai</div><div class="karakter-body">Membutuhkan waktu ratusan tahun untuk terurai secara alami.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">⏳</div><div class="karakter-info-box"><div class="karakter-header">Sangat Sulit Terurai</div><div class="karakter-body">Membutuhkan waktu puluhan hingga ratusan tahun untuk hancur.</div></div></div>""", unsafe_allow_html=True)
         with k_col2:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">♻️</div><div class="karakter-info-box"><div class="karakter-header">Dapat Didaur Ulang</div><div class="karakter-body">Dapat diolah kembali menjadi produk baru yang bernilai ekonomi.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">♻️</div><div class="karakter-info-box"><div class="karakter-header">Dapat Didaur Ulang</div><div class="karakter-body">Bisa dilebur dan diolah kembali menjadi barang bernilai ekonomi.</div></div></div>""", unsafe_allow_html=True)
         with k_col3:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">🧪</div><div class="karakter-info-box"><div class="karakter-header">Berasal dari Bahan Sintetis</div><div class="karakter-body">Dibuat dari bahan kimia atau proses industri pabrik.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">🧪</div><div class="karakter-info-box"><div class="karakter-header">Bahan Sintetis</div><div class="karakter-body">Hasil dari pemrosesan kimiawi pabrik, plastik, atau olahan tambang logam.</div></div></div>""", unsafe_allow_html=True)
         with k_col4:
-            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">🌏</div><div class="karakter-info-box"><div class="karakter-header">Mencemari Lingkungan</div><div class="karakter-body">Jika tidak dikelola dengan baik dapat mencemari tanah, air, dan laut.</div></div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="karakter-card"><div class="karakter-icon anorganik">🌏</div><div class="karakter-info-box"><div class="karakter-header">Potensi Bahaya</div><div class="karakter-body">Bisa merusak ekosistem tanah dan laut jika dibuang begitu saja.</div></div></div>""", unsafe_allow_html=True)
             
         # 3. Contoh Sampah Anorganik Grid (5 Kolom)
-        st.markdown('<div class="section-title anorganik">Contoh Sampah Anorganik</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title anorganik">Contoh Sampah Anorganik Sehari-hari</div>', unsafe_allow_html=True)
         c_col1, c_col2, c_col3, c_col4, c_col5 = st.columns(5)
         
         with c_col1:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/botol_plastik.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Botol Plastik & Kantong Kresek</div><div class="contoh-desc">Terbuat dari plastik PE atau PET yang sulit terurai secara alami, tetapi dapat didaur ulang.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Botol & Plastik Kresek</div><div class="contoh-desc">Plastik PET/PE yang bernilai tinggi di bank sampah dan industri daur ulang.</div></div></div>', unsafe_allow_html=True)
             
         with c_col2:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/kaleng_logam.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Kaleng Minuman & Logam</div><div class="contoh-desc">Kaleng aluminium atau besi dapat didaur ulang menjadi produk logam baru.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Kaleng & Kemasan Logam</div><div class="contoh-desc">Aluminium dan seng yang dapat dilebur ulang tanpa menurunkan kualitasnya.</div></div></div>', unsafe_allow_html=True)
             
         with c_col3:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/botol_kaca.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Botol Kaca & Pecahan Beling</div><div class="contoh-desc">Kaca membutuhkan waktu sangat lama untuk terurai, namun dapat didaur ulang.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Botol Kaca & Beling</div><div class="contoh-desc">Material kaca tahan lama yang dapat dipakai ulang atau didaur ulang.</div></div></div>', unsafe_allow_html=True)
             
         with c_col4:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/styrofoam.jpg", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Styrofoam & Kardus Berlapis</div><div class="contoh-desc">Styrofoam sulit terurai dan dapat mencemari lingkungan jika dibakar.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Styrofoam Kemasan</div><div class="contoh-desc">Material ringan yang sangat beracun jika dibakar dan sulit terurai.</div></div></div>', unsafe_allow_html=True)
             
         with c_col5:
             st.markdown('<div class="contoh-card-container">', unsafe_allow_html=True)
             st.image("assets/images/baterai_elektronik.png", use_container_width=True)
-            st.markdown('<div class="contoh-content"><div class="contoh-title">Baterai & Elektronik</div><div class="contoh-desc">Mengandung bahan kimia berbahaya, perlu penanganan khusus dan didaur ulang.</div></div></div>', unsafe_allow_html=True)
+            st.markdown('<div class="contoh-content"><div class="contoh-title">Baterai & E-Waste</div><div class="contoh-desc">Limbah elektronik beracun (B3) yang butuh tempat penampungan khusus.</div></div></div>', unsafe_allow_html=True)
 
-        # 4. Tips Pengelolaan & Ringkasan Materi Anorganik
-        b_col1, b_col2 = st.columns([1, 1])
-        
-        with b_col1:
-            st.markdown('<div class="section-title anorganik">🧺 Tips Pengelolaan</div>', unsafe_allow_html=True)
+        # 4. FITUR BARU: Boleh vs Jangan Didaur Ulang Biasa (Do's & Don'ts)
+        st.markdown('<div class="section-title anorganik">⚠️ Panduan Pemilahan Daur Ulang Anorganik</div>', unsafe_allow_html=True)
+        dd_col1, dd_col2 = st.columns(2)
+        with dd_col1:
             st.markdown("""
-            <div class="tips-container">
-                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">🗑️</div><span>Pisahkan sampah anorganik dari sampah organik.</span></div>
-                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">💧</div><span>Bersihkan sampah sebelum didaur ulang.</span></div>
-                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">🛍️</div><span>Gunakan kembali barang yang masih bisa dipakai.</span></div>
+            <div class="dos-donts-box" style="border-left: 4px solid #b45309;">
+                <div class="dos-title" style="color:#b45309;">✅ Diterima Bank Sampah / Didaur Ulang</div>
+                <ul class="dos-list">
+                    <li>Botol plastik minuman (PET), gelas plastik, dan kemasan botol shampoo (HDPE).</li>
+                    <li>Kaleng minuman aluminium, seng, dan besi bekas.</li>
+                    <li>Kardus bersih, kertas koran, buku, dan majalah bekas.</li>
+                    <li>Botol kaca utuh atau wadah beling bersih.</li>
+                </ul>
             </div>
             """, unsafe_allow_html=True)
-            
-        with b_col2:
-            st.markdown('<div class="section-title anorganik">📋 Ringkasan Materi</div>', unsafe_allow_html=True)
+        with dd_col2:
             st.markdown("""
-            <div class="ringkasan-box">
-                <ul class="ringkasan-list">
-                    <li>Berasal dari bahan sintetis atau non-hayati.</li>
-                    <li>Sulit atau tidak dapat terurai secara alami.</li>
-                    <li>Dapat didaur ulang menjadi produk baru.</li>
-                    <li>Perlu pengelolaan agar tidak mencemari lingkungan.</li>
+            <div class="dos-donts-box" style="border-left: 4px solid #991b1b;">
+                <div class="donts-title">❌ Perlu Perlakuan Khusus / Jangan Dicampur</div>
+                <ul class="donts-list">
+                    <li><strong>Baterai & Lampu Bekas:</strong> Mengandung logam berat (B3), jangan dibuang di wadah sampah biasa!</li>
+                    <li><strong>Plastik Kotor Berminyak:</strong> Bilas dulu dengan air sebelum disetorkan ke bank sampah.</li>
+                    <li><strong>Pecahan Kaca Tajam:</strong> Bungkus aman dengan koran tebal agar tidak melukai petugas kebersihan.</li>
+                    <li><strong>Kemasan Sachet Makanan Berlapis Aluminium:</strong> Kumpulkan terpisah untuk dibuat kreasi ecobricks.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
 
-        # 5. Bottom Navigation Bar Anorganik
+        # 5. Langkah Konkret Pengelolaan & Ringkasan Materi Anorganik
+        b_col1, b_col2 = st.columns([1, 1])
+        
+        with b_col1:
+            st.markdown('<div class="section-title anorganik">🧺 Langkah 3R (Reduce, Reuse, Recycle)</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="tips-container">
+                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">1️⃣</div><span><strong>Bersihkan Dahulu:</strong> Cuci/bilas sisa minuman dari botol atau kaleng dan keringkan.</span></div>
+                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">2️⃣</div><span><strong>Pipihkan / Pipihkan:</strong> Remas botol plastik dan pipihkan kardus untuk menghemat ruang wadah.</span></div>
+                <div class="tips-item"><div class="tips-badge" style="background:#fffbeb; color:#b45309;">3️⃣</div><span><strong>Setor ke Bank Sampah:</strong> Tabung sampah anorganik bernilai ke bank sampah terdekat atau pemulung.</span></div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with b_col2:
+            st.markdown('<div class="section-title anorganik">📋 Ringkasan Poin Penting</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="ringkasan-box">
+                <ul class="ringkasan-list">
+                    <li>Sampah anorganik tidak dapat busuk secara alami.</li>
+                    <li>Potensi ekonomi tinggi jika dikumpulkan dalam keadaan bersih dan terpisah.</li>
+                    <li>Mengurangi penggunaan plastik sekali pakai adalah langkah terbaik (Reduce).</li>
+                    <li>Pengelolaan anorganik mencegah pencemaran mikroplastik di rantai makanan kita.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 6. Bottom Navigation Bar Anorganik
         st.markdown("""
         <div class="bottom-nav-box" style="background: #fffbeb; border: 1px solid #fef08a;">
             <div class="bottom-nav-text" style="color: #b45309;">
                 <span>📖</span>
-                <span>Pelajari lebih lanjut tentang jenis sampah lainnya dan cara pengelolaan yang tepat untuk masa depan yang lebih baik!</span>
+                <span>Kamu telah mempelajari dasar pemilahan sampah! Saatnya mempraktikkan pemilahan di rumah.</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
