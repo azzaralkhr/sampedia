@@ -129,7 +129,7 @@ def render_page():
             font-size: 1.15rem;
             font-weight: 700;
             color: #0f172a;
-            margin: 20px 0 12px 0;
+            margin: 24px 0 12px 0;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -212,6 +212,30 @@ def render_page():
             font-size: 0.75rem;
             color: #64748b;
             line-height: 1.3;
+        }
+
+        /* Main Method Card (Pengolahan Utama) */
+        .main-method-card {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 16px;
+            height: 100%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .main-method-header {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0f172a;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-method-body {
+            font-size: 0.83rem;
+            color: #334155;
+            line-height: 1.5;
         }
 
         /* Detail Box Styling */
@@ -382,10 +406,62 @@ def render_page():
             st.image("assets/images/kulit_telur.jpg", use_container_width=True)
             st.markdown('<div class="contoh-content"><div class="contoh-title">Cangkang Telur</div><div class="contoh-desc">Sumber kalsium tinggi untuk menutrisi akar tanaman.</div></div></div>', unsafe_allow_html=True)
 
-        # 4. PENJELASAN KHUSUS DETAIL - EXPANDER INTERAKTIF (Mencegah Long Scroll)
-        st.markdown('<div class="section-title">⚠️ Panduan Pemilahan Khusus & Pengomposan</div>', unsafe_allow_html=True)
+        # 4. PENGOLAHAN UTAMA (ALUR INTI SAMPAH ORGANIK)
+        st.markdown('<div class="section-title">♻️ Pengolahan Utama Sampah Organik (Solusi Inti)</div>', unsafe_allow_html=True)
+        m_col1, m_col2, m_col3 = st.columns(3)
         
-        with st.expander("🔴 **KLIK DI SINI: Jenis Sampah Organik Khusus (Hindari Kompos Rutin)**", expanded=True):
+        with m_col1:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #156347;">🍂 1. Pengomposan (Kompos Takakura / Ember)</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Sisa sayur, kulit buah, daun kering, ampas kopi/teh.<br><br>
+                    <b>Alur Pengolahan:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li>Cacah sisa sayur/buah hingga berukuran kecil.</li>
+                        <li>Campurkan dengan bahan cokelat (daun kering/serbuk kayu) dengan rasio 1:1.</li>
+                        <li>Tambahkan aktivator pengurai (EM4) dan aduk rata dalam wadah berpori.</li>
+                        <li>Dalam 2-4 minggu, hasilnya menjadi pupuk kompos kaya hara untuk tanaman.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with m_col2:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #156347;">🕳️ 2. Lubang Resapan Biopori (LRB)</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Sisa makanan, daun gugur, cangkang telur.<br><br>
+                    <b>Alur Pengolahan:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li>Buat lubang silindris di tanah kedalaman 80-100 cm dengan bor biopori.</li>
+                        <li>Masukkan pipa PVC berlubang lalu isi secara berkala dengan sampah organik rumah tangga.</li>
+                        <li>Sampah akan diurai fauna tanah (cacing), meningkatkan daya serap air tanah, dan mencegah banjir.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with m_col3:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #156347;">🧪 3. Pembuatan Eco-Enzyme / Maggot BSF</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Kulit buah segar (jeruk, nanas, apel) & sisa lauk pauk.<br><br>
+                    <b>Alur Pengolahan:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li><b>Eco-Enzyme:</b> Fermentasi kulit buah + gula merah + air (rasio 3:1:10) selama 3 bulan untuk pembersih alami.</li>
+                        <li><b>Maggot BSF:</b> Berikan sisa makanan ke larva lalat tentara hitam untuk pakan ternak tinggi protein.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 5. PENJELASAN KHUSUS DETAIL (PENGECEUALIAN ORGANIK)
+        st.markdown('<div class="section-title">⚠️ Panduan Pemilahan Khusus & Pengecualian</div>', unsafe_allow_html=True)
+        
+        with st.expander("🔴 **KLIK DI SINI: Jenis Sampah Organik Khusus (Hindari Kompos Rutin)**", expanded=False):
             st.caption("Pilih jenis sampah di bawah untuk melihat alasan teknis, cara penanganan aman, dan lokasi pembuangannya:")
             
             tab_j1, tab_j2, tab_j3, tab_j4 = st.tabs([
@@ -445,7 +521,7 @@ def render_page():
                 </div>
                 """, unsafe_allow_html=True)
 
-        # 5. Langkah Konkret & Ringkasan
+        # 6. Langkah Konkret & Ringkasan
         b_col1, b_col2 = st.columns([1, 1])
         with b_col1:
             st.markdown('<div class="section-title">🧺 Langkah Praktis Pengelolaan di Rumah</div>', unsafe_allow_html=True)
@@ -464,17 +540,17 @@ def render_page():
                 <ul class="ringkasan-list">
                     <li>Sampah organik berasal dari sisa hayati/makhluk hidup.</li>
                     <li>Penguraian berlangsung cepat dan ramah lingkungan jika dipilah.</li>
-                    <li>Dapat diubah menjadi pupuk organik kaya nutrisi.</li>
+                    <li>Dapat diubah menjadi pupuk organik kaya nutrisi melalui pengomposan.</li>
                     <li>Memilah sampah organik dari rumah memangkas hingga 60% beban sampah ke TPA.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
 
-        # 6. Bottom Navigation Bar
+        # 7. Bottom Navigation Bar
         st.markdown("""
         <div class="bottom-nav-box">
             <div class="bottom-nav-text">
-                <span>📖 Lanjutkan edukasi untuk memahami jenis sampah anorganik dan perlakuan khususnya!</span>
+                <span>📖 Lanjutkan edukasi untuk memahami jenis sampah anorganik dan alur Bank Sampah!</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -497,7 +573,7 @@ def render_page():
         <div class="hero-banner" style="background: linear-gradient(135deg, #7c2d12 0%, #b45309 100%);">
             <div class="hero-text">
                 <h2 class="hero-title">2. Sampah Anorganik</h2>
-                <p class="hero-desc">Sampah dari bahan sintetis atau olahan non-hayati yang sangat sulit hingga tidak bisa terurai alami. Wajib dikelola dengan prinsip 3R (Reduce, Reuse, Recycle) agar tidak menumpuk ratusan tahun di bumi.</p>
+                <p class="hero-desc">Sampah dari bahan sintetis atau olahan non-hayati yang sangat sulit hingga tidak bisa terurai alami. Wajib dikelola dengan prinsip 3R (Reduce, Reuse, Recycle) dan disetor ke Bank Sampah agar tidak menumpuk di bumi.</p>
             </div>
             <div class="hero-image-container">
                 <img src="{img_base64_anorg}" alt="Sampah Anorganik">
@@ -542,14 +618,65 @@ def render_page():
             st.image("assets/images/baterai_elektronik.png", use_container_width=True)
             st.markdown('<div class="contoh-content"><div class="contoh-title">Baterai & E-Waste</div><div class="contoh-desc">Limbah elektronik beracun (B3) yang butuh penanganan khusus.</div></div></div>', unsafe_allow_html=True)
 
-        # 4. PENJELASAN KHUSUS DETAIL - EXPANDER INTERAKTIF (Anorganik Khusus)
-        st.markdown('<div class="section-title anorganik">⚠️ Perlakuan Khusus & Tata Cara Daur Ulang</div>', unsafe_allow_html=True)
+        # 4. PENGOLAHAN UTAMA (ALUR INTI SAMPAH ANORGANIK)
+        st.markdown('<div class="section-title anorganik">🏦 Pengolahan Utama Sampah Anorganik (Solusi Inti)</div>', unsafe_allow_html=True)
+        m_col1, m_col2, m_col3 = st.columns(3)
+        
+        with m_col1:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #b45309;">🏦 1. Penyetoran ke Bank Sampah</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Botol PET, gelas plastik, kardus, kaleng minuman, buku bekas.<br><br>
+                    <b>Alur Penyetoran:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li><b>Pilahkan:</b> Kelompokkan sampah berdasarkan jenis (plastik, kertas, logam, kaca).</li>
+                        <li><b>Bersihkan:</b> Bilas sisa minuman/makanan dan keringkan.</li>
+                        <li><b>Setor:</b> Bawa ke Bank Sampah terdekat untuk ditimbang & ditukar menjadi saldo tabungan/uang tunai.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with m_col2:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #b45309;">♻️ 2. Daur Ulang Industri & Mitra Daur Ulang</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Plastik keras (HDPE/PP), galon bekas, besi tua, kardus gelombang.<br><br>
+                    <b>Alur Pengolahan:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li>Sampah yang terkumpul di Bank Sampah/Pengepul disalurkan ke pabrik daur ulang.</li>
+                        <li>Plastik dicacah menjadi bijih plastik (pellet) untuk dicetak ulang jadi produk baru.</li>
+                        <li>Logam & kertas dilebur kembali menjadi bahan baku industri.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with m_col3:
+            st.markdown("""
+            <div class="main-method-card">
+                <div class="main-method-header" style="color: #b45309;">🎨 3. Guna Ulang (Reuse) & Upcycling</div>
+                <div class="main-method-body">
+                    <b>Bahan:</b> Jar kaca, kaleng bekas, botol plastik tebal, kain perca.<br><br>
+                    <b>Alur Pengolahan:</b>
+                    <ol style="margin-left:-15px; margin-bottom:0;">
+                        <li><b>Guna Ulang:</b> Jar kaca dipakai kembali sebagai wadah bumbu atau tempat penyimpanan.</li>
+                        <li><b>Upcycling:</b> Kaleng cat bekas dihias menjadi pot tanaman cantik atau tempat pensil deskoratif.</li>
+                    </ol>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # 5. PENJELASAN KHUSUS DETAIL (PENGECEUALIAN ANORGANIK)
+        st.markdown('<div class="section-title anorganik">⚠️ Perlakuan Khusus & Pengecualian Anorganik</div>', unsafe_allow_html=True)
         
         # Pop-Up Dialog Quick Action
         if st.button("🚨 Klik di Sini untuk Peringatan Khusus Baterai & Limbah B3", use_container_width=True):
             show_b3_dialog()
 
-        with st.expander("🟡 **KLIK DI SINI: Panduan Daur Ulang & Penanganan Kaca/Plastik/Sachet**", expanded=True):
+        with st.expander("🟡 **KLIK DI SINI: Panduan Daur Ulang & Penanganan Kaca/Plastik/Sachet**", expanded=False):
             st.caption("Pilih tab di bawah untuk mempelajari cara aman mengolah sampah anorganik khusus:")
             
             tab_a1, tab_a2, tab_a3, tab_a4 = st.tabs([
@@ -606,7 +733,7 @@ def render_page():
                 </div>
                 """, unsafe_allow_html=True)
 
-        # 5. Langkah Konkret & Ringkasan Anorganik
+        # 6. Langkah Konkret & Ringkasan Anorganik
         b_col1, b_col2 = st.columns([1, 1])
         with b_col1:
             st.markdown('<div class="section-title anorganik">🧺 Langkah 3R (Reduce, Reuse, Recycle)</div>', unsafe_allow_html=True)
@@ -624,14 +751,14 @@ def render_page():
             <div class="ringkasan-box">
                 <ul class="ringkasan-list">
                     <li>Sampah anorganik tidak dapat membusuk atau terurai alami.</li>
-                    <li>Sangat bernilai ekonomi tinggi jika dikumpulkan bersih dan terpisah.</li>
+                    <li>Sangat bernilai ekonomi tinggi jika dikumpulkan bersih dan disetor ke Bank Sampah.</li>
                     <li>Mengurangi penggunaan plastik sekali pakai adalah pilihan terbaik (Reduce).</li>
                     <li>Pemilahan tepat mencegah ancaman mikroplastik di rantai makanan kita.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
 
-        # 6. Bottom Navigation Bar Anorganik
+        # 7. Bottom Navigation Bar Anorganik
         st.markdown("""
         <div class="bottom-nav-box" style="background: #fffbeb; border: 1px solid #fef08a;">
             <div class="bottom-nav-text" style="color: #b45309;">
