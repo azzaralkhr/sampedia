@@ -126,53 +126,53 @@ def render_page():
     
     .title { 
         text-align: center; 
-        font-size: 36px; 
+        font-size: 34px; 
         font-weight: 800; 
         color: #0f291b; 
-        margin-top: 10px; 
-        margin-bottom: 8px; 
+        margin-top: 5px; 
+        margin-bottom: 6px; 
     }
     .sub { 
         text-align: center; 
-        font-size: 17px; 
+        font-size: 16px; 
         color: #475569; 
-        margin-bottom: 30px; 
+        margin-bottom: 25px; 
         font-weight: 500;
     }
     
     div[data-testid="stRadio"] label {
         color: #0f172a !important; 
-        font-size: 17px !important;
+        font-size: 16px !important;
         font-weight: 700 !important;
     }
     div[data-testid="stRadio"] div[data-testid="stMarkdownContainer"] p {
         color: #0f172a !important;
         font-weight: 700 !important;
-        font-size: 17px !important;
+        font-size: 16px !important;
     }
     
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background: #ffffff !important;
         border-radius: 16px !important;
-        padding: 22px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+        padding: 20px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
         border: 1px solid #e2e8f0 !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 16px !important;
     }
     
     .card-inside-title {
-        font-size: 20px;
+        font-size: 19px;
         font-weight: 800;
         color: #0f291b;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 10px;
+        padding-bottom: 8px;
     }
     
     div[data-testid="stImage"] img {
         width: 100% !important;
-        max-width: 240px !important;
-        height: 190px !important;
+        max-width: 220px !important;
+        height: 180px !important;
         object-fit: cover !important;
         border-radius: 12px !important;
         border: 2px solid #cbd5e1;
@@ -182,7 +182,7 @@ def render_page():
     
     .stButton > button {
         width: 100% !important;
-        height: 50px !important;
+        height: 48px !important;
         border: none !important;
         border-radius: 10px !important;
         background: #10b981 !important;
@@ -198,57 +198,105 @@ def render_page():
         transform: translateY(-1px);
     }
 
+    /* Banners & Cards */
+    .banner-organik {
+        background-color: #f0fdf4;
+        border: 2px solid #86efac;
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 14px;
+    }
+    .banner-anorganik {
+        background-color: #fffbeb;
+        border: 2px solid #fde68a;
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 14px;
+    }
+
+    .bin-status {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 15px;
+        margin-top: 10px;
+        display: inline-block;
+    }
+    .bin-organik {
+        background-color: #dcfce7;
+        color: #156347;
+        border: 1px solid #86efac;
+    }
+    .bin-anorganik {
+        background-color: #fef3c7;
+        color: #d97706;
+        border: 1px solid #fde68a;
+    }
+
+    .rekomendasi-container {
+        background: #f8fafc;
+        border-left: 5px solid #10b981;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-top: 12px;
+        font-size: 15px;
+        color: #0f172a;
+        line-height: 1.5;
+    }
+    .rekomendasi-header {
+        color: #0f291b;
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
     .banjir-container {
         background: #f0fdf4;
         border-left: 5px solid #16a34a;
         padding: 16px;
         border-radius: 10px;
-        margin-top: 16px;
-        font-size: 16px;
+        font-size: 15px;
         color: #0f172a;
         line-height: 1.6;
     }
     .banjir-header {
         color: #15803d;
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 800;
         margin-bottom: 6px;
     }
 
-    .rekomendasi-container {
+    .tips-box {
         background: #f8fafc;
-        border-left: 5px solid #475569;
-        padding: 16px;
-        border-radius: 10px;
-        margin-top: 16px;
-        font-size: 16px;
-        color: #0f172a;
-        line-height: 1.6;
-    }
-    .rekomendasi-header {
+        border: 1px dashed #cbd5e1;
+        padding: 14px;
+        border-radius: 12px;
+        margin-top: 14px;
+        font-size: 14px;
         color: #334155;
-        font-size: 18px;
-        font-weight: 800;
-        margin-bottom: 8px;
     }
     
     .placeholder-result {
         border: 2px dashed #cbd5e1;
-        padding: 70px 20px;
+        padding: 60px 20px;
         border-radius: 12px;
         text-align: center;
-        color: #475569;
-        font-size: 16px;
+        color: #64748b;
+        font-size: 15px;
         background: #fafafa;
         line-height: 1.6;
     }
 
     .stDetails summary {
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
     }
     div[data-testid="stExpander"] div[data-testid="stMarkdownContainer"] p {
-        font-size: 15px !important;
+        font-size: 14px !important;
         line-height: 1.6 !important;
     }
     </style>
@@ -270,13 +318,17 @@ def render_page():
         st.session_state.pred_conf = 0.0
         st.session_state.pred_img = None
 
+    # TATA LETAK 2 KOLOM SEIMBANG
     col_left, col_right = st.columns(2)
 
+    # =====================================
+    # KOLOM KIRI (INPUT & FOTO + TIPS PENGISI SPACE)
+    # =====================================
     with col_left:
         with st.container(border=True):
             if "Kamera HP/Webcam" in pilihan_metode:
                 st.markdown("<div class='card-inside-title'>📸 Tangkap Foto dari Kamera</div>", unsafe_allow_html=True)
-                st.info("💡 **Petunjuk:** Arahkan objek sampah ke tengah layar, lalu tekan **Take Photo**. Sistem akan memotong (*crop*) otomatis area tengah 224x224 piksel.")
+                st.info("💡 **Petunjuk:** Arahkan objek sampah ke tengah layar, lalu tekan **Take Photo**.")
                 
                 cam_photo = st.camera_input("Ambil Foto Sampah")
                 
@@ -287,7 +339,7 @@ def render_page():
                     # Potong bagian tengah berukuran 224x224
                     img_cropped = crop_center_box(img_captured, target_size=224)
                     
-                    with st.spinner("Memproses potongan gambar (224x224)..."):
+                    with st.spinner("Menganalisis gambar..."):
                         label, confidence = predict_image(img_cropped)
                         st.session_state.pred_label = label
                         st.session_state.pred_conf = confidence
@@ -305,82 +357,116 @@ def render_page():
                     btn_upload = st.button("✨ Proses File Unggahan", key="btn_process_upload_v4")
                     
                     if btn_upload:
-                        with st.spinner("Membaca berkas digital..."):
+                        with st.spinner("Menganalisis gambar..."):
                             label_up, confidence_up = predict_image(img_uploaded)
                             st.session_state.pred_label = label_up
                             st.session_state.pred_conf = confidence_up
                             st.session_state.pred_img = cv2.cvtColor(img_uploaded, cv2.COLOR_BGR2RGB)
 
+            # Pengisi Dead Space di Kolom Kiri
+            st.markdown("""
+            <div class='tips-box'>
+                <b style='color: #0f291b; font-size: 15px;'>💡 Tips Foto untuk Hasil Akurat:</b>
+                <ul style='margin-top: 6px; margin-bottom: 0; padding-left: 18px; line-height: 1.6;'>
+                    <li>Pastikan pencahayaan cukup terang.</li>
+                    <li>Fokuskan hanya pada <b>satu objek sampah</b>.</li>
+                    <li>Gunakan latar belakang yang kontras/bersih.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # =====================================
+    # KOLOM KANAN (HASIL & AKSI RINGKAS)
+    # =====================================
     with col_right:
         with st.container(border=True):
-            st.markdown("<div class='card-inside-title'>📊 Dashboard Hasil & Aksi</div>", unsafe_allow_html=True)
+            st.markdown("<div class='card-inside-title'>🏷️ Hasil Klasifikasi</div>", unsafe_allow_html=True)
             
             if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
-                st.image(st.session_state.pred_img, caption="Hasil Cropping 224x224 piksel", use_container_width=False)
+                # Tampilkan pratinjau gambar tanpa teks teknis '224x224'
+                st.image(st.session_state.pred_img, caption="Pratinjau Foto Sampah", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
                     st.markdown(f"""
-                    <div style='background-color: #eff6ff; border: 2px solid #93c5fd; padding: 18px; border-radius: 12px; text-align: center; margin-top: 12px;'>
-                        <h2 style='margin: 0; color: #1e40af; font-size: 26px; font-weight: 800;'>🍂 SAMPAH ORGANIK</h2>
-                        <p style='margin: 6px 0 0 0; color: #2563eb; font-weight: 700; font-size: 16px;'>Tingkat Keyakinan System: {st.session_state.pred_conf * 100:.1f}%</p>
+                    <div class='banner-organik'>
+                        <h2 style='margin: 0; color: #156347; font-size: 24px; font-weight: 800;'>🟢 SAMPAH ORGANIK</h2>
+                        <p style='margin: 4px 0 0 0; color: #16a34a; font-weight: 700; font-size: 15px;'>Tingkat Keyakinan Sistem: {st.session_state.pred_conf * 100:.1f}%</p>
+                        <div class='bin-status bin-organik'>🗑️ Masukkan ke: Tong Sampah Hijau</div>
                     </div>
                     
                     <div class='rekomendasi-container'>
-                        <div class='rekomendasi-header'>📋 TINDAKAN YANG DIREKOMENDASIKAN:</div>
-                        <ol style='margin: 0; padding-left: 20px; color: #0f172a; font-weight: 600;'>
-                            <li style='margin-bottom: 6px;'><b>Pisahkan Segera:</b> Masukkan ke kompartemen wadah hijau khusus sisa organik.</li>
+                        <div class='rekomendasi-header'>📋 TINDAKAN DIREKOMENDASIKAN:</div>
+                        <ul style='margin: 0; padding-left: 18px; color: #0f172a; font-weight: 600;'>
+                            <li style='margin-bottom: 4px;'><b>Pisahkan Segera:</b> Masukkan ke kompartemen wadah hijau khusus sisa organik.</li>
                             <li><b>Daur Ulang Hayati:</b> Olah menjadi pupuk kompos tanaman rumahan.</li>
-                        </ol>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                        
+                else:
+                    st.markdown(f"""
+                    <div class='banner-anorganik'>
+                        <h2 style='margin: 0; color: #d97706; font-size: 24px; font-weight: 800;'>🟡 ANORGANIK (RECYCLABLE)</h2>
+                        <p style='margin: 4px 0 0 0; color: #b45309; font-weight: 700; font-size: 15px;'>Tingkat Keyakinan Sistem: {st.session_state.pred_conf * 100:.1f}%</p>
+                        <div class='bin-status bin-anorganik'>🗑️ Masukkan ke: Tong Sampah Kuning</div>
                     </div>
                     
+                    <div class='rekomendasi-container' style='border-left-color: #d97706;'>
+                        <div class='rekomendasi-header'>📋 TINDAKAN DIREKOMENDASIKAN:</div>
+                        <ul style='margin: 0; padding-left: 18px; color: #0f172a; font-weight: 600;'>
+                            <li style='margin-bottom: 4px;'><b>Bilas & Bersihkan:</b> Pastikan kemasan kosong dari zat cair sisa konsumsi.</li>
+                            <li><b>Setor Bank Sampah:</b> Kumpulkan secara kolektif untuk ditukar nilai ekonomi.</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class='placeholder-result'>
+                    🔍 <b style='font-size: 17px; color: #334155;'>Sistem Siap Menerima Data</b><br><br>
+                    Silakan unggah atau ambil foto sampah di panel sebelah kiri untuk melihat hasil analisis.
+                </div>
+                """, unsafe_allow_html=True)
+
+    # =====================================
+    # PANDUAN & EDUKASI LANJUTAN (FULL WIDTH - BAWAH)
+    # =====================================
+    if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
+        with st.container(border=True):
+            st.markdown("<div class='card-inside-title'>📖 Panduan Pengolahan & Dampak Lingkungan</div>", unsafe_allow_html=True)
+            
+            col_edu_1, col_edu_2 = st.columns(2)
+            
+            if st.session_state.pred_label == "Organic":
+                with col_edu_1:
+                    st.markdown("""
                     <div class='banjir-container'>
                         <div class='banjir-header'>🌊 Pengaruh Pada Drainase Kota:</div>
                         Membuang sisa makanan ke selokan menciptakan sedimentasi lumpur yang menyumbat jalur air. Mengolahnya sendiri di rumah secara drastis mengurangi risiko banjir lokal!
                     </div>
                     """, unsafe_allow_html=True)
-                    
-                    st.write("")
-                    with st.expander("📖 Pelajari Cara Pembuatan Kompos Sederhana"):
+                
+                with col_edu_2:
+                    with st.expander("📖 Pelajari Cara Pembuatan Kompos Sederhana", expanded=True):
                         st.markdown("""
                         1. **Persiapan:** Sediakan wadah tertutup yang telah diberi lubang udara kecil di sekelilingnya.
                         2. **Penyusunan:** Campurkan sampah organik basah (sisa sayur) dengan bahan kering (daun/tanah) secara seimbang.
                         3. **Pematangan:** Aduk seminggu sekali, dalam kurun waktu sekitar 4-6 minggu pupuk organik siap dipanen.
                         """)
-                        
-                else:
-                    st.markdown(f"""
-                    <div style='background-color: #fffbeb; border: 2px solid #fde68a; padding: 18px; border-radius: 12px; text-align: center; margin-top: 12px;'>
-                        <h2 style='margin: 0; color: #92400e; font-size: 26px; font-weight: 800;'>🍾 ANORGANIK (RECYCLABLE)</h2>
-                        <p style='margin: 6px 0 0 0; color: #d97706; font-weight: 700; font-size: 16px;'>Tingkat Keyakinan System: {st.session_state.pred_conf * 100:.1f}%</p>
-                    </div>
-                    
-                    <div class='rekomendasi-container'>
-                        <div class='rekomendasi-header'>📋 TINDAKAN YANG DIREKOMENDASIKAN:</div>
-                        <ol style='margin: 0; padding-left: 20px; color: #0f172a; font-weight: 600;'>
-                            <li style='margin-bottom: 6px;'><b>Bilas & Bersihkan:</b> Pastikan kemasan kosong dari zat cair sisa konsumsi.</li>
-                            <li><b>Kumpulkan secara Kolektif:</b> Setorkan ke Bank Sampah terdekat untuk ditukar barang ekonomi.</li>
-                        </ol>
-                    </div>
-                    
-                    <div class='banjir-container' style='background: #fff5f5; border-left: 5px solid #ef4444;'>
+            else:
+                with col_edu_1:
+                    st.markdown("""
+                    <div class='banjir-container' style='background: #fff5f5; border-left-color: #ef4444;'>
                         <div class='banjir-header' style='color: #991b1b;'>⚠️ Bahaya Tersumbatnya Aliran Air:</div>
                         Komponen plastik/kaleng tidak terurai secara alami. Sifatnya yang mengapung berisiko tinggi mengunci pintu air utama penahan luapan banjir.
                     </div>
                     """, unsafe_allow_html=True)
-                    
-                    st.write("")
-                    with st.expander("📖 Kiat Optimalisasi Setoran Bank Sampah"):
+                
+                with col_edu_2:
+                    with st.expander("📖 Kiat Optimalisasi Setoran Bank Sampah", expanded=True):
                         st.markdown("""
-                        * **Kempiskan Botol:** Pipihkan botol plastik atau kaleng aluminium untuk memperbanyak daya tampung kantong pilah Anda.
-                        * **Kelompokkan Material:** Kelompokkan plastik keras (HDPE), botol transparan (PET), dan kertas karton agar nilai ekonomisnya dinilai lebih tinggi.
+                        * **Kempiskan Botol:** Pipihkan botol plastik atau kaleng aluminium untuk memperbanyak daya tampung wadah Anda.
+                        * **Kelompokkan Material:** Kelompokkan plastik keras (HDPE), botol transparan (PET), dan kertas karton agar nilai ekonomisnya lebih tinggi.
                         """)
-            else:
-                st.markdown("""
-                <div class='placeholder-result'>
-                    🔍 <b style='font-size: 18px;'>Sistem Siap Menerima Data</b><br><br>
-                    Gunakan panel masukan di sebelah kiri untuk menampilkan hasil analisis kecerdasan buatan.
-                </div>
-                """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     render_page()
