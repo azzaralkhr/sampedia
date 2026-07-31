@@ -284,6 +284,21 @@ div[data-testid="stImage"] img {
     line-height: 1.5;
 }
 
+/* Tab Detail Box Style (Sesuai Gambar 2) */
+.tab-detail-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 10px;
+}
+.tab-detail-title {
+    font-weight: 800;
+    font-size: 16px;
+    color: #b45309;
+    margin-bottom: 10px;
+}
+
 .stDetails summary {
     font-size: 15px !important;
     font-weight: 700 !important;
@@ -436,7 +451,7 @@ Silakan unggah atau ambil foto sampah di panel sebelah kiri untuk melihat hasil 
     if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
         
         # ========================================================================================
-        # BAGIAN 2: PANDUAN MEMBUAT KOMPOS (EXPANDER) (Full Width)
+        # BAGIAN 2: PANDUAN PENGOLAHAN (EXPANDER) (Full Width)
         # ========================================================================================
         if st.session_state.pred_label == "Organic":
             with st.container(border=True):
@@ -460,59 +475,151 @@ Silakan unggah atau ambil foto sampah di panel sebelah kiri untuk melihat hasil 
 </ol>""", unsafe_allow_html=True)
 
         # ========================================================================================
-        # BAGIAN 3: EDUKASI PENGECUALIAN KOMPOS / PEMILAHAN KHUSUS (Full Width)
+        # BAGIAN 3: EDUKASI PENGECUALIAN & PEMILAHAN KHUSUS (Disesuaikan Per Kategori)
         # ========================================================================================
         with st.container(border=True):
             st.markdown("<div class='card-inside-title'>⚠️ Panduan Pemilahan Khusus & Pengecualian</div>", unsafe_allow_html=True)
             
-            with st.expander("KLIK DI SINI: Jenis Sampah Organik Khusus (Hindari Kompos Rutin)", expanded=False):
-                col_ex1, col_ex2, col_ex3, col_ex4 = st.columns(4)
-                
-                with col_ex1:
-                    st.markdown("""<div class='edu-card'>
+            if st.session_state.pred_label == "Organic":
+                with st.expander("KLIK DI SINI: Jenis Sampah Organik Khusus (Hindari Kompos Rutin)", expanded=False):
+                    col_ex1, col_ex2, col_ex3, col_ex4 = st.columns(4)
+                    
+                    with col_ex1:
+                        st.markdown("""<div class='edu-card'>
 <div class='edu-title'>🛢️ Minyak Jelantah</div>
 <div class='edu-desc'><b>Alasan:</b> Menutupi pori tanah & menyumbat saluran.<br><b>Solusi:</b> Kumpulkan dalam jerigen, setor ke Bank Sampah untuk biodiesel.</div>
 </div>""", unsafe_allow_html=True)
-                    
-                with col_ex2:
-                    st.markdown("""<div class='edu-card'>
+                        
+                    with col_ex2:
+                        st.markdown("""<div class='edu-card'>
 <div class='edu-title'>🍗 Daging & Tulang</div>
 <div class='edu-desc'><b>Alasan:</b> Memicu bau busuk menyengat & mengundang tikus/alat.<br><b>Solusi:</b> Tanam langsung di tanah dalam (metode biopori).</div>
 </div>""", unsafe_allow_html=True)
-                    
-                with col_ex3:
-                    st.markdown("""<div class='edu-card'>
+                        
+                    with col_ex3:
+                        st.markdown("""<div class='edu-card'>
 <div class='edu-title'>💩 Kotoran Hewan</div>
 <div class='edu-desc'><b>Alasan:</b> Berisiko membawa parasit/bakteri berbahaya.<br><b>Solusi:</b> Olah khusus pada komposter fermentasi terpisah.</div>
 </div>""", unsafe_allow_html=True)
-                    
-                with col_ex4:
-                    st.markdown("""<div class='edu-card'>
+                        
+                    with col_ex4:
+                        st.markdown("""<div class='edu-card'>
 <div class='edu-title'>🍂 Tanaman Sakit</div>
 <div class='edu-desc'><b>Alasan:</b> Spora jamur/hama bisa menulari tanaman lain.<br><b>Solusi:</b> Buang terpisah atau bakar secara aman.</div>
 </div>""", unsafe_allow_html=True)
 
+            else:
+                # --- PENGECUALIAN ANORGANIK (Sesuai Gambar 2) ---
+                with st.expander("🟡 KLIK DI SINI: Panduan Daur Ulang & Penanganan Kaca/Plastik/Sachet", expanded=False):
+                    st.write("Pilih tab di bawah untuk mempelajari cara aman mengolah sampah anorganik khusus:")
+                    
+                    tab1, tab2, tab3, tab4 = st.tabs([
+                        "🔋 Baterai & Lampu (B3)", 
+                        "🔪 Pecahan Kaca Tajam", 
+                        "🧹 Plastik Berminyak", 
+                        "🧃 Sachet Aluminium"
+                    ])
+                    
+                    with tab1:
+                        st.markdown("""<div class='tab-detail-card'>
+<div class='tab-detail-title'>🔋 Baterai Bekas & Lampu Neon (Limbah B3)</div>
+<p style='margin-bottom: 8px; font-size: 14px; color: #334155;'>
+<b style='color: #dc2626;'>❌ Risiko Bahaya:</b> Mengandung logam berat berbahaya (Merkuri, Kadmium, Timbal). Jika dibuang di tempat sampah biasa, racun dapat meresap ke dalam air tanah dan memicu kanker.
+</p>
+<p style='margin-bottom: 0; font-size: 14px; color: #334155;'>
+<b>💡 Solusi Pembuangan Aman:</b><br>
+1. <b>Jangan Pernah Dibakar / Dibuang Dapur!</b> Kumpulkan terpisah di kotak/toples khusus B3.<br>
+2. Tutup kutub positif-negatif baterai dengan lakban bening untuk cegah percikan api.<br>
+3. <b>Ke mana dibuang?</b> Bawa ke <i>Drop Box E-Waste</i> di pusat perbelanjaan, Kantor Dinas Lingkungan Hidup (DLH), atau Bank Sampah terdekat.
+</p>
+</div>""", unsafe_allow_html=True)
+
+                    with tab2:
+                        st.markdown("""<div class='tab-detail-card'>
+<div class='tab-detail-title'>🔪 Pecahan Kaca & Benda Tajam</div>
+<p style='margin-bottom: 8px; font-size: 14px; color: #334155;'>
+<b style='color: #dc2626;'>❌ Risiko Bahaya:</b> Berisiko tinggi melukai petugas kebersihan/pemulung jika dicampur begitu saja dalam kantong plastik.
+</p>
+<p style='margin-bottom: 0; font-size: 14px; color: #334155;'>
+<b>💡 Solusi Pembuangan Aman:</b><br>
+1. Bungkus pecahan kaca dengan kertas koran tebal atau kardus bekas.<br>
+2. Rekatkan dengan isolasi hingga rapat dan beri label tulisan jelas: <b>"AWAS PECAHAN KACA"</b>.<br>
+3. Pisahkan dari kantong sampah daur ulang lainnya.
+</p>
+</div>""", unsafe_allow_html=True)
+
+                    with tab3:
+                        st.markdown("""<div class='tab-detail-card'>
+<div class='tab-detail-title'>🧹 Plastik Bekas Minyak / Makanan Basah</div>
+<p style='margin-bottom: 8px; font-size: 14px; color: #334155;'>
+<b style='color: #dc2626;'>❌ Risiko Bahaya:</b> Minyak dan sisa makanan menempel membuat plastik ditolak oleh mesin daur ulang pabrik dan mencemari material bersih lainnya.
+</p>
+<p style='margin-bottom: 0; font-size: 14px; color: #334155;'>
+<b>💡 Solusi Pembuangan Aman:</b><br>
+1. Bilas dengan sedikit air sabun cair bekas cuci piring hingga minyak memudar.<br>
+2. Keringkan sebentar sebelum dimasukkan ke dalam kantong pemilahan anorganik.<br>
+3. Plastik bersih memiliki nilai jual jauh lebih tinggi di Bank Sampah.
+</p>
+</div>""", unsafe_allow_html=True)
+
+                    with tab4:
+                        st.markdown("""<div class='tab-detail-card'>
+<div class='tab-detail-title'>🧃 Kemasan Sachet Multilayer / Aluminium Foil</div>
+<p style='margin-bottom: 8px; font-size: 14px; color: #334155;'>
+<b style='color: #dc2626;'>❌ Risiko Bahaya:</b> Terdiri dari campuran lapisan plastik dan logam yang sangat sulit dipisahkan secara mekanis oleh Bank Sampah konvensional.
+</p>
+<p style='margin-bottom: 0; font-size: 14px; color: #334155;'>
+<b>💡 Solusi Pembuangan Aman:</b><br>
+1. Kumpulkan sachet bersih dan kering.<br>
+2. Manfaatkan menjadi bahan pembuatan <b>Ecobrick</b> (dipadatkan dalam botol plastik).<br>
+3. Setor ke tempat pengolahan sampah spesifik yang memiliki teknologi daur ulang multilayer.
+</p>
+</div>""", unsafe_allow_html=True)
+
         # ========================================================================================
-        # BAGIAN 4: KERUGIAN LINGKUNGAN JIKA TIDAK DIOLAH (Full Width Paling Bawah)
+        # BAGIAN 4: KERUGIAN LINGKUNGAN JIKA TIDAK DIOLAH (Disesuaikan Per Kategori)
         # ========================================================================================
-        with st.container(border=True):
-            st.markdown("<div class='card-inside-title'>🌍 Bahaya Sampah Organik Jika Cuma Dibuang Begitu Saja</div>", unsafe_allow_html=True)
-            
-            col_danger1, col_danger2 = st.columns(2)
-            
-            with col_danger1:
-                st.markdown("""<div class='edu-card' style='background: #fef2f2; border-color: #fca5a5;'>
+        if st.session_state.pred_label == "Organic":
+            with st.container(border=True):
+                st.markdown("<div class='card-inside-title'>🌍 Bahaya Sampah Organik Jika Cuma Dibuang Begitu Saja</div>", unsafe_allow_html=True)
+                
+                col_danger1, col_danger2 = st.columns(2)
+                
+                with col_danger1:
+                    st.markdown("""<div class='edu-card' style='background: #fef2f2; border-color: #fca5a5;'>
 <div class='edu-title' style='color: #991b1b;'>💥 Bahaya Gas Metana (TPA Meledak)</div>
 <div class='edu-desc' style='color: #7f1d1d;'>
 Sampah organik yang terperangkap di TPA tanpa udara akan mengalami pembusukan anaerobik dan menghasilkan <b>gas metana</b>. Gas ini sangat mudah terbakar, memicu ledakan TPA, serta menjadi gas rumah kaca yang 28x lebih berbahaya dari CO2.
 </div>
 </div>""", unsafe_allow_html=True)
-                
-            with col_danger2:
-                st.markdown("""<div class='edu-card' style='background: #eff6ff; border-color: #93c5fd;'>
+                    
+                with col_danger2:
+                    st.markdown("""<div class='edu-card' style='background: #eff6ff; border-color: #93c5fd;'>
 <div class='edu-title' style='color: #1e40af;'>🌊 Penyumbatan & Banjir Lokal</div>
 <div class='edu-desc' style='color: #1e3a8a;'>
 Membuang sisa makanan atau sampah basah ke selokan/got menciptakan endapan lumpur padat yang membusuk. Endapan ini mempersempit aliran air dan menjadi penyebab utama pendangkalan saluran pemicu banjir lokal.
+</div>
+</div>""", unsafe_allow_html=True)
+
+        else:
+            with st.container(border=True):
+                st.markdown("<div class='card-inside-title'>🌍 Bahaya Sampah Anorganik Jika Tidak Didaur Ulang</div>", unsafe_allow_html=True)
+                
+                col_danger1, col_danger2 = st.columns(2)
+                
+                with col_danger1:
+                    st.markdown("""<div class='edu-card' style='background: #fef2f2; border-color: #fca5a5;'>
+<div class='edu-title' style='color: #991b1b;'>🐢 Bahaya Mikroplastik & Pencemaran Laut</div>
+<div class='edu-desc' style='color: #7f1d1d;'>
+Sampah anorganik membutuhkan ratusan tahun untuk terurai. Plastik akan terpecah menjadi <b>mikroplastik</b> yang mengontaminasi air tanah, dimakan biota laut, dan akhirnya masuk ke rantai makanan manusia.
+</div>
+</div>""", unsafe_allow_html=True)
+                    
+                with col_danger2:
+                    st.markdown("""<div class='edu-card' style='background: #fffbeb; border-color: #fde68a;'>
+<div class='edu-title' style='color: #b45309;'>🔥 Racun Dioxin dari Pembakaran Sampah</div>
+<div class='edu-desc' style='color: #78350f;'>
+Membakar sampah plastik atau kaleng secara sembarangan menghasilkan <b>gas racun Dioksin & Furan</b>. Menghirup asap ini berisiko tinggi menyebabkan penyakit ISPA, gangguan pernapasan kronis, hingga kanker paru-paru.
 </div>
 </div>""", unsafe_allow_html=True)
 
