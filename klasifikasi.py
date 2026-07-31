@@ -62,7 +62,7 @@ def predict_image(img_bgr):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # 1. Konversi BGR (OpenCV) -> RGB (Sama seperti image.load_img di Keras)
+    # 1. Konversi BGR (OpenCV) -> RGB
     if len(img_bgr.shape) == 3 and img_bgr.shape[2] == 3:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     else:
@@ -71,10 +71,10 @@ def predict_image(img_bgr):
     # 2. Resize ke target_size (224, 224)
     img_resized = cv2.resize(img_rgb, (224, 224))
     
-    # 3. Terapkan Preprocessing khusus ResNet50 (Bukan /255.0)
+    # 3. Terapkan Preprocessing khusus ResNet50
     img_preprocessed = resnet50_preprocess_input(img_resized)
 
-    # 4. Tambahkan Batch Dimension (axis=0)
+    # 4. Tambahkan Batch Dimension
     img_input = np.expand_dims(img_preprocessed, axis=0)
 
     # 5. Jalankan Inferensi Model
@@ -82,7 +82,7 @@ def predict_image(img_bgr):
     interpreter.invoke()
     pred = interpreter.get_tensor(output_details[0]['index'])
 
-    # 6. Logika Klasifikasi (Persis dari Colab: prob = float(pred[0][0]))
+    # 6. Logika Klasifikasi
     prob = float(pred[0][0])
 
     if prob > 0.5:
@@ -96,12 +96,9 @@ def predict_image(img_bgr):
 
 def crop_center_box(img_bgr, target_size=224):
     """
-    Memotong (crop) tepat di bagian tengah gambar berukuran target_size x target_size (224x224).
-    Jika ukuran gambar lebih kecil dari target_size, lakukan penyesuaian otomatis.
+    Memotong (crop) tepat di bagian tengah gambar berukuran target_size x target_size.
     """
     h, w, _ = img_bgr.shape
-    
-    # Menentukan ukuran crop (maksimal selebar/setinggi gambar jika terlalu kecil)
     box_w = min(w, target_size)
     box_h = min(h, target_size)
     
@@ -110,7 +107,6 @@ def crop_center_box(img_bgr, target_size=224):
     x2 = x1 + box_w
     y2 = y1 + box_h
     
-    # Lakukan cropping tepat di area tengah 224x224
     cropped_img = img_bgr[y1:y2, x1:x2]
     return cropped_img
 
@@ -243,31 +239,9 @@ def render_page():
         padding: 14px 16px;
         border-radius: 8px;
         margin-top: 12px;
-        font-size: 15px;
-        color: #0f172a;
-        line-height: 1.5;
-    }
-    .rekomendasi-header {
-        color: #0f291b;
-        font-size: 16px;
-        font-weight: 800;
-        margin-bottom: 6px;
-    }
-
-    .banjir-container {
-        background: #f0fdf4;
-        border-left: 5px solid #16a34a;
-        padding: 16px;
-        border-radius: 10px;
-        font-size: 15px;
+        font-size: 14px;
         color: #0f172a;
         line-height: 1.6;
-    }
-    .banjir-header {
-        color: #15803d;
-        font-size: 17px;
-        font-weight: 800;
-        margin-bottom: 6px;
     }
 
     .tips-box {
@@ -291,13 +265,29 @@ def render_page():
         line-height: 1.6;
     }
 
+    /* Edukasi & Grid Style */
+    .edu-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px;
+        height: 100%;
+    }
+    .edu-title {
+        font-weight: 800;
+        font-size: 15px;
+        color: #0f291b;
+        margin-bottom: 6px;
+    }
+    .edu-desc {
+        font-size: 13px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
     .stDetails summary {
         font-size: 15px !important;
         font-weight: 700 !important;
-    }
-    div[data-testid="stExpander"] div[data-testid="stMarkdownContainer"] p {
-        font-size: 14px !important;
-        line-height: 1.6 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -318,12 +308,12 @@ def render_page():
         st.session_state.pred_conf = 0.0
         st.session_state.pred_img = None
 
-    # TATA LETAK 2 KOLOM SEIMBANG
+    # ========================================================================================
+    # BAGIAN 1: INPUT & HASIL UTAMA (2 Kolom Seimbang)
+    # ========================================================================================
     col_left, col_right = st.columns(2)
 
-    # =====================================
-    # KOLOM KIRI (INPUT & FOTO + TIPS PENGISI SPACE)
-    # =====================================
+    # --- KOLOM KIRI: INPUT ---
     with col_left:
         with st.container(border=True):
             if "Kamera HP/Webcam" in pilihan_metode:
@@ -335,8 +325,6 @@ def render_page():
                 if cam_photo is not None:
                     file_bytes = np.asarray(bytearray(cam_photo.read()), dtype=np.uint8)
                     img_captured = cv2.imdecode(file_bytes, 1)
-                    
-                    # Potong bagian tengah berukuran 224x224
                     img_cropped = crop_center_box(img_captured, target_size=224)
                     
                     with st.spinner("Menganalisis gambar..."):
@@ -363,7 +351,7 @@ def render_page():
                             st.session_state.pred_conf = confidence_up
                             st.session_state.pred_img = cv2.cvtColor(img_uploaded, cv2.COLOR_BGR2RGB)
 
-            # Pengisi Dead Space di Kolom Kiri
+            # Tips Foto Akurat
             st.markdown("""
             <div class='tips-box'>
                 <b style='color: #0f291b; font-size: 15px;'>💡 Tips Foto untuk Hasil Akurat:</b>
@@ -375,30 +363,42 @@ def render_page():
             </div>
             """, unsafe_allow_html=True)
 
-    # =====================================
-    # KOLOM KANAN (HASIL & AKSI RINGKAS)
-    # =====================================
+    # --- KOLOM KANAN: HASIL REKAP SANGAT RINGKAS ---
     with col_right:
         with st.container(border=True):
             st.markdown("<div class='card-inside-title'>🏷️ Hasil Klasifikasi</div>", unsafe_allow_html=True)
             
             if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
-                # Tampilkan pratinjau gambar tanpa teks teknis '224x224'
                 st.image(st.session_state.pred_img, caption="Pratinjau Foto Sampah", use_container_width=False)
                 
                 if st.session_state.pred_label == "Organic":
                     st.markdown(f"""
                     <div class='banner-organik'>
-                        <h2 style='margin: 0; color: #156347; font-size: 24px; font-weight: 800;'>🟢 SAMPAH ORGANIK</h2>
-                        <p style='margin: 4px 0 0 0; color: #16a34a; font-weight: 700; font-size: 15px;'>Tingkat Keyakinan Sistem: {st.session_state.pred_conf * 100:.1f}%</p>
-                        <div class='bin-status bin-organik'>🗑️ Masukkan ke: Tong Sampah Hijau</div>
+                        <h2 style='margin: 0; color: #156347; font-size: 22px; font-weight: 800;'>🟢 SAMPAH ORGANIK</h2>
+                        <p style='margin: 2px 0 0 0; color: #16a34a; font-weight: 700; font-size: 14px;'>Akurasi System: {st.session_state.pred_conf * 100:.1f}%</p>
+                        <div class='bin-status bin-organik'>🗑️ Masukkan ke: TONG SAMPAH HIJAU</div>
                     </div>
                     
                     <div class='rekomendasi-container'>
-                        <div class='rekomendasi-header'>📋 TINDAKAN DIREKOMENDASIKAN:</div>
-                        <ul style='margin: 0; padding-left: 18px; color: #0f172a; font-weight: 600;'>
-                            <li style='margin-bottom: 4px;'><b>Pisahkan Segera:</b> Masukkan ke kompartemen wadah hijau khusus sisa organik.</li>
-                            <li><b>Daur Ulang Hayati:</b> Olah menjadi pupuk kompos tanaman rumahan.</li>
+                        <b>💧 LANGKAH AWAL (3 Detik):</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>Tiriskan kuah/airnya terlebih dahulu.</li>
+                        </ul>
+                        
+                        <b style='color: #dc2626;'>❌ PANTANGAN:</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>DILARANG dibuang ke selokan/got.</li>
+                            <li>DILARANG dibungkus plastik rapat.</li>
+                        </ul>
+                        
+                        <b>🌱 MANFAAT LANGSUNG:</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>Tanam di pot atau olah jadi kompos.</li>
+                        </ul>
+                        
+                        <b>💡 CONTOH SEJENIS:</b>
+                        <ul style='margin: 4px 0 0 0; padding-left: 18px;'>
+                            <li>Sisa sayur, dedaunan, ampas teh.</li>
                         </ul>
                     </div>
                     """, unsafe_allow_html=True)
@@ -406,16 +406,31 @@ def render_page():
                 else:
                     st.markdown(f"""
                     <div class='banner-anorganik'>
-                        <h2 style='margin: 0; color: #d97706; font-size: 24px; font-weight: 800;'>🟡 ANORGANIK (RECYCLABLE)</h2>
-                        <p style='margin: 4px 0 0 0; color: #b45309; font-weight: 700; font-size: 15px;'>Tingkat Keyakinan Sistem: {st.session_state.pred_conf * 100:.1f}%</p>
-                        <div class='bin-status bin-anorganik'>🗑️ Masukkan ke: Tong Sampah Kuning</div>
+                        <h2 style='margin: 0; color: #d97706; font-size: 22px; font-weight: 800;'>🟡 SAMPAH ANORGANIK</h2>
+                        <p style='margin: 2px 0 0 0; color: #b45309; font-weight: 700; font-size: 14px;'>Akurasi System: {st.session_state.pred_conf * 100:.1f}%</p>
+                        <div class='bin-status bin-anorganik'>🗑️ Masukkan ke: TONG SAMPAH KUNING</div>
                     </div>
                     
                     <div class='rekomendasi-container' style='border-left-color: #d97706;'>
-                        <div class='rekomendasi-header'>📋 TINDAKAN DIREKOMENDASIKAN:</div>
-                        <ul style='margin: 0; padding-left: 18px; color: #0f172a; font-weight: 600;'>
-                            <li style='margin-bottom: 4px;'><b>Bilas & Bersihkan:</b> Pastikan kemasan kosong dari zat cair sisa konsumsi.</li>
-                            <li><b>Setor Bank Sampah:</b> Kumpulkan secara kolektif untuk ditukar nilai ekonomi.</li>
+                        <b>💧 LANGKAH AWAL (3 Detik):</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>Kosongkan dan bilas sisa cairan/makanan.</li>
+                        </ul>
+                        
+                        <b style='color: #dc2626;'>❌ PANTANGAN:</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>DILARANG membakar sampah plastik/kaleng.</li>
+                            <li>DILARANG mencampur dengan sampah basah.</li>
+                        </ul>
+                        
+                        <b>🌱 MANFAAT LANGSUNG:</b>
+                        <ul style='margin: 4px 0 8px 0; padding-left: 18px;'>
+                            <li>Dapat didaur ulang / disetor ke Bank Sampah.</li>
+                        </ul>
+                        
+                        <b>💡 CONTOH SEJENIS:</b>
+                        <ul style='margin: 4px 0 0 0; padding-left: 18px;'>
+                            <li>Botol plastik, kaleng minuman, kardus.</li>
                         </ul>
                     </div>
                     """, unsafe_allow_html=True)
@@ -427,46 +442,105 @@ def render_page():
                 </div>
                 """, unsafe_allow_html=True)
 
-    # =====================================
-    # PANDUAN & EDUKASI LANJUTAN (FULL WIDTH - BAWAH)
-    # =====================================
+    # Jika sudah ada hasil prediksi, tampilkan Bagian 2, 3, dan 4 di bawah (Full Width)
     if st.session_state.pred_label is not None and st.session_state.pred_label != "Unknown":
+        
+        # ========================================================================================
+        # BAGIAN 2: PANDUAN MEMBUAT KOMPOS (EXPANDER) (Full Width)
+        # ========================================================================================
+        if st.session_state.pred_label == "Organic":
+            with st.container(border=True):
+                st.markdown("<div class='card-inside-title'>📖 Panduan Pengolahan Sampah</div>", unsafe_allow_html=True)
+                
+                with st.expander("📖 Pelajari Cara Pembuatan Kompos Sederhana di Rumah", expanded=False):
+                    st.markdown("""
+                    <ol style='line-height: 1.8; font-size: 14px; color: #1e293b; margin-bottom: 0;'>
+                        <li><b>Persiapan:</b> Sediakan wadah tertutup (ember/tong) yang telah diberi lubang-lubang udara kecil di sekelilingnya.</li>
+                        <li><b>Penyusunan:</b> Campurkan sampah organik basah (sisa sayur/buah) dengan bahan kering (daun kering/tanah/serbuk kayu) secara seimbang.</li>
+                        <li><b>Pematangan:</b> Aduk seminggu sekali untuk sirkulasi udara. Dalam kurun waktu sekitar <b>4–6 minggu</b>, pupuk organik siap dipanen!</li>
+                    </ol>
+                    """, unsafe_allow_html=True)
+        else:
+            with st.container(border=True):
+                st.markdown("<div class='card-inside-title'>📖 Panduan Daur Ulang Anorganik</div>", unsafe_allow_html=True)
+                
+                with st.expander("📖 Pelajari Cara Pengolahan & Penyetoran Anorganik", expanded=False):
+                    st.markdown("""
+                    <ol style='line-height: 1.8; font-size: 14px; color: #1e293b; margin-bottom: 0;'>
+                        <li><b>Pembersihan:</b> Bilas wadah plastik atau kaleng hingga bersih dari sisa makanan/minuman agar tidak mengundang hama.</li>
+                        <li><b>Pemilahan:</b> Kelompokkan sampah berdasarkan jenisnya (plastik PET, kertas/kardus, atau logam).</li>
+                        <li><b>Penyetoran:</b> Pipihkan botol/dus untuk menghemat ruang, lalu setor ke Bank Sampah terdekat untuk didaur ulang.</li>
+                    </ol>
+                    """, unsafe_allow_html=True)
+
+        # ========================================================================================
+        # BAGIAN 3: EDUKASI PENGECUALIAN KOMPOS / PEMILAHAN KHUSUS (Full Width)
+        # ========================================================================================
         with st.container(border=True):
-            st.markdown("<div class='card-inside-title'>📖 Panduan Pengolahan & Dampak Lingkungan</div>", unsafe_allow_html=True)
+            st.markdown("<div class='card-inside-title'>⚠️ Panduan Pemilahan Khusus & Pengecualian</div>", unsafe_allow_html=True)
             
-            col_edu_1, col_edu_2 = st.columns(2)
-            
-            if st.session_state.pred_label == "Organic":
-                with col_edu_1:
+            with st.expander("KLIK DI SINI: Jenis Sampah Organik Khusus (Hindari Kompos Rutin)", expanded=False):
+                col_ex1, col_ex2, col_ex3, col_ex4 = st.columns(4)
+                
+                with col_ex1:
                     st.markdown("""
-                    <div class='banjir-container'>
-                        <div class='banjir-header'>🌊 Pengaruh Pada Drainase Kota:</div>
-                        Membuang sisa makanan ke selokan menciptakan sedimentasi lumpur yang menyumbat jalur air. Mengolahnya sendiri di rumah secara drastis mengurangi risiko banjir lokal!
+                    <div class='edu-card'>
+                        <div class='edu-title'>🛢️ Minyak Jelantah</div>
+                        <div class='edu-desc'><b>Alasan:</b> Menutupi pori tanah & menyumbat saluran.<br><b>Solusi:</b> Kumpulkan dalam jerigen, setor ke Bank Sampah untuk biodiesel.</div>
                     </div>
                     """, unsafe_allow_html=True)
-                
-                with col_edu_2:
-                    with st.expander("📖 Pelajari Cara Pembuatan Kompos Sederhana", expanded=True):
-                        st.markdown("""
-                        1. **Persiapan:** Sediakan wadah tertutup yang telah diberi lubang udara kecil di sekelilingnya.
-                        2. **Penyusunan:** Campurkan sampah organik basah (sisa sayur) dengan bahan kering (daun/tanah) secara seimbang.
-                        3. **Pematangan:** Aduk seminggu sekali, dalam kurun waktu sekitar 4-6 minggu pupuk organik siap dipanen.
-                        """)
-            else:
-                with col_edu_1:
+                    
+                with col_ex2:
                     st.markdown("""
-                    <div class='banjir-container' style='background: #fff5f5; border-left-color: #ef4444;'>
-                        <div class='banjir-header' style='color: #991b1b;'>⚠️ Bahaya Tersumbatnya Aliran Air:</div>
-                        Komponen plastik/kaleng tidak terurai secara alami. Sifatnya yang mengapung berisiko tinggi mengunci pintu air utama penahan luapan banjir.
+                    <div class='edu-card'>
+                        <div class='edu-title'>🍗 Daging & Tulang</div>
+                        <div class='edu-desc'><b>Alasan:</b> Memicu bau busuk menyengat & mengundang tikus/alat.<br><b>Solusi:</b> Tanam langsung di tanah dalam (metode biopori).</div>
                     </div>
                     """, unsafe_allow_html=True)
+                    
+                with col_ex3:
+                    st.markdown("""
+                    <div class='edu-card'>
+                        <div class='edu-title'>💩 Kotoran Hewan</div>
+                        <div class='edu-desc'><b>Alasan:</b> Berisiko membawa parasit/bakteri berbahaya.<br><b>Solusi:</b> Olah khusus pada komposter fermentasi terpisah.</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with col_ex4:
+                    st.markdown("""
+                    <div class='edu-card'>
+                        <div class='edu-title'>🍂 Tanaman Sakit</div>
+                        <div class='edu-desc'><b>Alasan:</b> Spora jamur/hama bisa menulari tanaman lain.<br><b>Solusi:</b> Buang terpisah atau bakar secara aman.</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        # ========================================================================================
+        # BAGIAN 4: KERUGIAN LINGKUNGAN JIKA TIDAK DIOLAH (Full Width Paling Bawah)
+        # ========================================================================================
+        with st.container(border=True):
+            st.markdown("<div class='card-inside-title'>🌍 Bahaya Sampah Organik Jika Cuma Dibuang Begitu Saja</div>", unsafe_allow_html=True)
+            
+            col_danger1, col_danger2 = st.columns(2)
+            
+            with col_danger1:
+                st.markdown("""
+                <div class='edu-card' style='background: #fef2f2; border-color: #fca5a5;'>
+                    <div class='edu-title' style='color: #991b1b;'>💥 Bahaya Gas Metana (TPA Meledak)</div>
+                    <div class='edu-desc' style='color: #7f1d1d;'>
+                        Sampah organik yang terperangkap di TPA tanpa udara akan mengalami pembusukan anaerobik dan menghasilkan <b>gas metana</b>. Gas ini sangat mudah terbakar, memicu ledakan TPA, serta menjadi gas rumah kaca yang 28x lebih berbahaya dari CO2.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                with col_edu_2:
-                    with st.expander("📖 Kiat Optimalisasi Setoran Bank Sampah", expanded=True):
-                        st.markdown("""
-                        * **Kempiskan Botol:** Pipihkan botol plastik atau kaleng aluminium untuk memperbanyak daya tampung wadah Anda.
-                        * **Kelompokkan Material:** Kelompokkan plastik keras (HDPE), botol transparan (PET), dan kertas karton agar nilai ekonomisnya lebih tinggi.
-                        """)
+            with col_danger2:
+                st.markdown("""
+                <div class='edu-card' style='background: #eff6ff; border-color: #93c5fd;'>
+                    <div class='edu-title' style='color: #1e40af;'>🌊 Penyumbatan & Banjir Lokal</div>
+                    <div class='edu-desc' style='color: #1e3a8a;'>
+                        Membuang sisa makanan atau sampah basah ke selokan/got menciptakan endapan lumpur padat yang membusuk. Endapan ini mempersempit aliran air dan menjadi penyebab utama pendangkalan saluran pemicu banjir lokal.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     render_page()
